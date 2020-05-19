@@ -1,0 +1,56 @@
+{
+  "project_info": {
+    "project_number": "785042572577",
+    "firebase_url": "https://petrolshare.firebaseio.com",
+    "project_id": "petrolshare",
+    "storage_bucket": "petrolshare.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:785042572577:android:ad7c9f6814d8f793cd6a60",
+        "android_client_info": {
+          "package_name": "de.docweirdo.petrolshare"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "785042572577-2v4jc44spblsra9ohr3o8q94sagj90t6.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "de.docweirdo.petrolshare",
+            "certificate_hash": "39173ea60f17f2e57b262da9557f0b8dedc05c18"
+          }
+        },
+        {
+          "client_id": "785042572577-angisgfmk00g1u57sq4d2dcpkb95p7hl.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "de.docweirdo.petrolshare",
+            "certificate_hash": "44d32dad35ed3ee323ff289e211f227422d03fe9"
+          }
+        },
+        {
+          "client_id": "785042572577-6bvpsfa3377sukadg5sl0li4pq8pb145.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBhAwvo7I9t-9f9j01MlRV3XywRm_l6JZM"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "785042572577-6bvpsfa3377sukadg5sl0li4pq8pb145.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

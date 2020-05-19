@@ -1,0 +1,101 @@
+import 'dart:collection';
+
+import 'package:flutter/widgets.dart';
+import 'package:flutter/material.dart';
+import 'package:petrolshare/states/LogList.dart';
+import 'package:petrolshare/widgets/CardListTile.dart';
+
+
+import 'package:provider/provider.dart';
+
+class LogsTab extends StatelessWidget{
+  LogsTab({Key key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context){
+    return Consumer<LogList>(
+      builder: (context, loglist, _) {
+        if (loglist == null) return Container();    //TODO: Add Empty LogList Screen
+        else if (loglist.hasBeenCalled) return _buildLogList(context, loglist);
+        else return Center(child: CircularProgressIndicator());
+      }
+    );
+  }
+
+  Widget _buildLogList(BuildContext context, LogList loglist) {
+
+    UnmodifiableListView loglistEntrys = loglist.logs;
+
+    return RefreshIndicator(
+      onRefresh: loglist.refreshLogs,
+      child: ListView.builder(
+        padding: const EdgeInsets.all(10.0),
+        itemCount: loglist.length,
+        itemBuilder: /*1*/ (context, i) {
+          return CardListTile(logModel: loglistEntrys[i]);
+        })
+    );
+  }
+
+
+  
+}
+
+/*
+
+class _LogsTabState extends State<LogsTab>{
+
+  Future<QuerySnapshot> logFuture;
+  Widget logFutureBuilderWidget;
+
+  @override
+  void initState(){
+    super.initState();
+    logFuture = Firestore.instance.collection('pools/F6KTd3LRUVXU1BH589yg/logs').getDocuments();
+    logFutureBuilderWidget = _createLogFutureBuilderWidget(context, logFuture);
+  }
+  
+
+  Widget _buildLogList(BuildContext context, QuerySnapshot snapshot) {
+
+    List<LogClass> logs = snapshot.documents.map( (doc) => 
+      LogClass(doc.documentID, doc['user'], doc['roadmeter'], doc['price'], doc['amount'], doc['date'])
+    ).toList();
+
+    return RefreshIndicator(
+      onRefresh: _handleRefresh,
+      child: ListView.builder(
+        padding: const EdgeInsets.all(10.0),
+        itemCount: snapshot.documents.length,
+        itemBuilder: /*1*/ (context, i) {
+          return CardListTile(logEntry: logs[i]);
+        })
+    );
+  }
+
+  
+  @override
+  Widget build(BuildContext context) => logFutureBuilderWidget;
+
+  Widget _createLogFutureBuilderWidget(BuildContext context, Future<QuerySnapshot> logFuture){
+    return FutureBuilder(
+      future: logFuture,
+      builder: (context, snapshot) {
+        if (!snapshot.hasData) return Center(child: CircularProgressIndicator());
+        return _buildLogList(context, snapshot.data);
+      });
+  }
+
+
+  Future<void> _handleRefresh() async{
+
+    Future<QuerySnapshot> firebaseFuture = Firestore.instance.collection('pools/F6KTd3LRUVXU1BH589yg/logs').getDocuments();
+    
+    return firebaseFuture.then((value) {
+      setState(() => logFutureBuilderWidget = _createLogFutureBuilderWidget(context, firebaseFuture)); 
+    });
+  }
+
+
+}
+*/
