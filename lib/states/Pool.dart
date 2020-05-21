@@ -1,10 +1,12 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/widgets.dart';
 import 'package:petrolshare/models/UserModel.dart';
+import 'package:petrolshare/services/data.dart';
 import 'package:petrolshare/states/LogList.dart';
 
 class Pool extends ChangeNotifier{
 
+  DataService _data;
   UserModel user;
   Firestore _firebase = Firestore.instance;
   LogList logList;
@@ -13,7 +15,14 @@ class Pool extends ChangeNotifier{
   int poolsRetrieved = 0; //0-notstarted 1-nopools 2-sucess
   String poolName;
 
-  Pool(this.user);
+  Pool(this.user){
+    _data = DataService(user);
+    _data.updatedUserModel().listen((updatedUser) async { 
+      user.name = updatedUser.name;
+      if (user.photoURL != updatedUser.photoURL) await user.loadPhotoFromURL(updatedUser.photoURL);
+      notifyListeners();
+    });
+    }
 
   Future<DocumentSnapshot> _getUserInfo(){
     return _firebase.document('users/${user.uid}').get();
@@ -57,6 +66,7 @@ class Pool extends ChangeNotifier{
     notifyListeners();
     logList.refreshLogs();  //maybe switch aroung the last to? is there a difference?
   }
+  
    
 
 }

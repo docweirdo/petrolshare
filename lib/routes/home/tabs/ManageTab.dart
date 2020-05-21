@@ -5,7 +5,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:petrolshare/routes/managing/MemberSettings.dart';
 import 'package:petrolshare/services/auth.dart';
-import 'package:petrolshare/states/LogList.dart';
 import 'package:petrolshare/states/Pool.dart';
 import 'package:petrolshare/widgets/NameAndIcon.dart';
 import 'package:petrolshare/widgets/PoolList.dart';
@@ -23,8 +22,9 @@ class ManageTab extends StatelessWidget{
   @override
   Widget build(BuildContext context) {
 
-    UserModel _user = Provider.of<UserModel>(context, listen: false);
+    
     Pool _pool = Provider.of<Pool>(context);
+    UserModel _user = _pool.user;
 
     //assert (_user.hashCode == _pool.user.hashCode);
     //Conclusion: Hot Reloading changes Object References. Presumably 

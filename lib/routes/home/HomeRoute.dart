@@ -33,7 +33,6 @@ class _HomeRouteState extends State<HomeRoute> with RouteAware{
   @override
   void initState() {
     super.initState();
-    _user = Provider.of<UserModel>(context, listen: false);
     animate();
   }
 
@@ -61,6 +60,7 @@ class _HomeRouteState extends State<HomeRoute> with RouteAware{
   Widget build(BuildContext context) {
 
     _pool = Provider.of<Pool>(context);
+    _user = _pool.user;
 
     return Scaffold(
       //backgroundColor: Theme.of(context).primaryColor,

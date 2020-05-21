@@ -7,24 +7,24 @@ class UserModel {
   String uid;
   String name;
   Uint8List photo;
+  String photoURL;
   bool inDatabase;
   String role;
   String identifier;
 
-  UserModel(this.uid, this.name, String photoUrl, this.inDatabase, this.role, [this.identifier]){
-    if (photoUrl != null){
-      _loadFromUrl(photoUrl);
-    }
+  UserModel(this.uid, this.name, this.photoURL, this.inDatabase, this.role, [this.identifier]){
+    loadPhotoFromURL(photoURL);
   }
 
-  void _loadFromUrl(String url) async {
-
-    try{
-      Uint8List bytes = await http.readBytes(url, headers: {});
-      photo = bytes;
-    }
-    catch(e){
-      print('Fetch Profile Pic: ' + e.toString());
+  Future<void> loadPhotoFromURL(String url) async {
+    if (url != null){
+      try{
+        photoURL = url;
+        photo = await http.readBytes(url, headers: {});
+      }
+      catch(e){
+        print('Fetch Profile Pic: ' + e.toString());
+      }
     }
   }
 
