@@ -25,22 +25,14 @@ class NameAndIcon extends StatelessWidget{
         Expanded(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
-            children: <Widget>[
-              FittedBox(
-                fit: BoxFit.scaleDown,
-                child: Text(user.name, style: TextStyle(fontSize: 20)),
-              ),
-              FittedBox(
-                fit: BoxFit.scaleDown,
-                child: Text(user.identifier ?? ' '),
-              ),
-            ]
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: _nameAndSubtext(),
           ),
         ),
         Container(
           child: IconButton(
             icon: Icon(Icons.exit_to_app),
-            onPressed: logoutCallback,
+            onPressed: () => logoutCallback(context),
           ),
           padding: EdgeInsets.only(right: 10),
         )
@@ -62,6 +54,24 @@ class NameAndIcon extends StatelessWidget{
       backgroundImage: MemoryImage(_user.photo),
       radius: 28,
     );
+  }
+
+  List<Widget> _nameAndSubtext(){
+    if (user.identifier != null)
+    return <Widget>[
+              FittedBox(
+                fit: BoxFit.scaleDown,
+                child: Text(user.name, style: TextStyle(fontSize: 20)),
+              ),
+              FittedBox(
+                fit: BoxFit.scaleDown,
+                child: Text(user.identifier),
+              )];
+    else return <Widget>[
+              FittedBox(
+                fit: BoxFit.scaleDown,
+                child: Text(user.name, style: TextStyle(fontSize: 20)),
+              )];
   }
 
 }

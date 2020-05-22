@@ -74,7 +74,7 @@ class LogList extends ChangeNotifier{
       doc['members'].forEach((uid, properties) {
         _members[uid] = UserModel(uid, properties['name'], properties['photoURL'], true, properties['role']);
         });
-      
+      return;
     }
     else throw "Pool $_pool.documentID members field doesn't exist";
   }

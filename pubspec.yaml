@@ -34,8 +34,9 @@ dependencies:
   google_sign_in: ^4.1.4
   http: ^0.12.0+4
   animations: ^1.0.0+5  #Work on new Entry animation later
+  fluttertoast: ^4.0.0
 
-
+  
 dev_dependencies:
   flutter_test:
     sdk: flutter

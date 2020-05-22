@@ -65,7 +65,10 @@ class _HomeRouteState extends State<HomeRoute> with RouteAware{
     return Scaffold(
       //backgroundColor: Theme.of(context).primaryColor,
       appBar: AppBar(
-        title: Text(_selectedIndex == 2 ? 'Petrolshare' : (_pool?.poolName ?? 'Petrolshare')),
+        title: FittedBox(
+          child: Text(_selectedIndex == 2 ? 'Petrolshare' : (_pool?.poolName ?? 'Petrolshare')),
+          fit: BoxFit.scaleDown,
+        ),
         centerTitle: true,
         elevation: 1.0,
         backgroundColor: Theme.of(context).primaryColor,
@@ -137,6 +140,7 @@ class _HomeRouteState extends State<HomeRoute> with RouteAware{
                       result['notes']
                     )
                   );
+                  Scaffold.of(context).showSnackBar(SnackBar(content: Text('Entry added')));
                 }
               }
             );

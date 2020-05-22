@@ -15,10 +15,28 @@ class AuthSevice{
   Stream<UserModel> get user {
     return _auth.onAuthStateChanged.asyncMap((FirebaseUser user) async{
       if (user == null) return null;
+
       DocumentReference userRef = Firestore.instance.collection('users').document(user.uid);
       DocumentSnapshot userDoc = await userRef.get();
-      if (!userDoc.exists) return UserModel(user.uid, user.displayName, user.photoUrl, false, null);  
-      else return UserModel(user.uid, userDoc['name'], userDoc['photoURL'], true, null, user.email ?? user.phoneNumber);
+
+      if (!userDoc.exists) {
+        return UserModel(
+          user.uid,
+          user.isAnonymous ? 'Anonymous' : user.displayName,
+          user.photoUrl,
+          false,
+          null,
+          user.isAnonymous ? null : (user.email ?? user.phoneNumber),
+          user.isAnonymous);  
+      }
+      else return UserModel(
+        user.uid, 
+        userDoc['name'], 
+        userDoc['photoURL'], 
+        true, 
+        null, 
+        user.isAnonymous ? null : (user.email ?? user.phoneNumber),
+        user.isAnonymous);
     });
   }
 

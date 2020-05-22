@@ -11,8 +11,9 @@ class UserModel {
   bool inDatabase;
   String role;
   String identifier;
+  bool isAnonymous;
 
-  UserModel(this.uid, this.name, this.photoURL, this.inDatabase, this.role, [this.identifier]){
+  UserModel(this.uid, this.name, this.photoURL, this.inDatabase, this.role, [this.identifier, this.isAnonymous]){
     loadPhotoFromURL(photoURL);
   }
 

@@ -134,7 +134,7 @@ class _NewEntryRouteState extends State<NewEntryRoute> {
                       else if (!isNumeric(value)) return 'Not a number';
                       return null;
                     },
-                    textInputAction: TextInputAction.next,
+                    textInputAction: TextInputAction.done,
                     onFieldSubmitted: (v){
                       FocusScope.of(context).nextFocus();
                     },

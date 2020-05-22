@@ -6,18 +6,20 @@ import 'package:petrolshare/states/LogList.dart';
 
 class Pool extends ChangeNotifier{
 
-  DataService _data;
+  DataService data;
   UserModel user;
   Firestore _firebase = Firestore.instance;
   LogList logList;
   Map<String, String> pools;
   String pool;
   int poolsRetrieved = 0; //0-notstarted 1-nopools 2-sucess
-  String poolName;
+  
+
+  String get poolName => pools == null ? null : pools[pool];
 
   Pool(this.user){
-    _data = DataService(user);
-    _data.updatedUserModel().listen((updatedUser) async { 
+    data = DataService(user);
+    data.updatedUserModel().listen((updatedUser) async { 
       user.name = updatedUser.name;
       if (user.photoURL != updatedUser.photoURL) await user.loadPhotoFromURL(updatedUser.photoURL);
       notifyListeners();
@@ -59,7 +61,6 @@ class Pool extends ChangeNotifier{
                 throw "Pool $poolID.documentID is incomplete";
               }
     pool = poolID;
-    poolName = poolSnap['name'];
     logList = LogList(_firebase.document('pools/$poolID'));
     await logList.fetchPoolMembers();
     user.role = logList.members[user.uid].role;     //Set Rule of the global UserModel depending on Pool
