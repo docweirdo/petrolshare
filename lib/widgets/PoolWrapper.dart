@@ -37,10 +37,8 @@ class PoolWrapper extends StatelessWidget{
 
     if (_pool.poolsRetrieved == 0){
       Future<Map<String, String>> pools = _pool.fetchPoolSelection();
-      poolSelection(context, pools).then((value) {
-        if (value != null) _pool.setPool(value);
-        }
-      );
+      pools.then((value) => poolSelection(context, value))
+      .then((value) {if (value != null) _pool.setPool(value);});
     }
     return _figureOutTab(_pool);
   }
@@ -58,14 +56,12 @@ class PoolWrapper extends StatelessWidget{
   }
 
 
-  Future<String> poolSelection(BuildContext context, Future<Map<String, String>> poolsFuture) async {
+  Future<String> poolSelection(BuildContext context, Map<String, String> pools){
     
-    Map<String, String> pools = await poolsFuture;
-
     if (pools.isEmpty) return null;
 
-    if (pools.length == 1) return pools.keys.toList()[0];
-
+    if (pools.length == 1) return Future.value(pools.keys.toList()[0]);
+    
     return showDialog(
       context: context,
       barrierDismissible: false,

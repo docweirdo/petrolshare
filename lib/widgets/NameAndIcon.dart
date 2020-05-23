@@ -32,7 +32,7 @@ class NameAndIcon extends StatelessWidget{
         Container(
           child: IconButton(
             icon: Icon(Icons.exit_to_app),
-            onPressed: () => logoutCallback(context),
+            onPressed: () => logoutCallback(context, user),
           ),
           padding: EdgeInsets.only(right: 10),
         )

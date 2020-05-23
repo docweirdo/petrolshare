@@ -10,7 +10,6 @@ import 'package:petrolshare/states/Pool.dart';
 import 'package:petrolshare/widgets/NameAndIcon.dart';
 import 'package:petrolshare/widgets/PoolList.dart';
 import 'package:provider/provider.dart';
-import 'package:cloud_functions/cloud_functions.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 
 
@@ -98,7 +97,8 @@ class ManageTab extends StatelessWidget{
                             title: Text('Switch Pool'),
                             onTap: () {
                               Future<Map<String, String>> pools = _pool.fetchPoolSelection();
-                              poolSelection(context, pools).then((value) {
+                              pools.then((value) => poolSelection(context, value))
+                              .then((value) {
                                 if (value != null && value != _pool.pool) {
                                   _pool.setPool(value).then((value) {
                                     Scaffold.of(context).showSnackBar(
@@ -167,7 +167,7 @@ class ManageTab extends StatelessWidget{
     
   }
   
-  void _handleLogout(BuildContext context){
+  void _handleLogout(BuildContext context, UserModel user){
     showDialog(
       context: context,
       builder: (BuildContext context) {
@@ -176,7 +176,9 @@ class ManageTab extends StatelessWidget{
           contentPadding: EdgeInsets.symmetric(horizontal: 20, vertical: 5),
           actionsPadding: EdgeInsets.symmetric(horizontal: 10, vertical: 5),
           title: Text("Log out"),
-          content: Text("Are you sure you want to log out?"),
+          content: user.isAnonymous ? 
+            Text("Are you sure you want to log out? Create a permanent account, otherwise your data will be lost")
+            : Text("Are you sure you want to log out?"),
           actions: <Widget>[
             FlatButton(
               child: Text("Cancel", style: TextStyle(fontSize: 15)),
@@ -366,14 +368,12 @@ class ManageTab extends StatelessWidget{
 
   }
 
-  Future<String> poolSelection(BuildContext context, Future<Map<String, String>> poolsFuture) async {
-    
-    Map<String, String> pools = await poolsFuture;
-
+  Future<String> poolSelection(BuildContext context, Map<String, String> pools){
+  
     if (pools.isEmpty) return null;
 
-    if (pools.length == 1) return pools.keys.toList()[0];
-
+    if (pools.length == 1) return Future.value(pools.keys.toList()[0]);
+    
     return showDialog(
       context: context,
       barrierDismissible: false,
@@ -385,6 +385,7 @@ class ManageTab extends StatelessWidget{
       }
     );
   }
+
   
 }
 
