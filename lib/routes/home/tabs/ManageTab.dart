@@ -100,9 +100,10 @@ class ManageTab extends StatelessWidget{
                               Future<Map<String, String>> pools = _pool.fetchPoolSelection();
                               poolSelection(context, pools).then((value) {
                                 if (value != null && value != _pool.pool) {
-                                  _pool.setPool(value);
-                                  Scaffold.of(context).showSnackBar(
-                                    SnackBar(content: Text('Switched to ${_pool.poolName}'), duration: Duration(seconds: 2)));
+                                  _pool.setPool(value).then((value) {
+                                    Scaffold.of(context).showSnackBar(
+                                      SnackBar(content: Text('Switched to ${_pool.poolName}'), duration: Duration(seconds: 2)));
+                                  });
                                 }
                               });
                             },
