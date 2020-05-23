@@ -11,6 +11,8 @@ import 'package:petrolshare/widgets/NameAndIcon.dart';
 import 'package:petrolshare/widgets/PoolList.dart';
 import 'package:provider/provider.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:url_launcher/url_launcher.dart';
+import 'package:mailto/mailto.dart';
 
 
 
@@ -120,15 +122,14 @@ class ManageTab extends StatelessWidget{
                           contentPadding: EdgeInsets.symmetric(horizontal: 30, vertical: 0),
                           leading: Icon(Icons.feedback),
                           title: Text('Feedback'),
+                          onTap: () => _sendFeedback(),
                         ),
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                           children: <Widget>[
                             Expanded(
                               child: InkWell(
-                                onTap: () {
-                                  
-                                },
+                                onTap: () => _launchURL("http://www.docweirdo.de"),
                                 child: Align(
                                   alignment: Alignment.center,
                                   child: Padding(
@@ -140,9 +141,7 @@ class ManageTab extends StatelessWidget{
                             ),
                             Expanded(
                               child: InkWell(
-                                onTap: () {
-
-                                },
+                                onTap: () => _launchURL("http://www.docweirdo.de"),
                                 child: Align(
                                   alignment: Alignment.center,
                                     child: Padding(
@@ -386,6 +385,22 @@ class ManageTab extends StatelessWidget{
     );
   }
 
+  void _launchURL(String url) async {
+    if (await canLaunch(url)) {
+      await launch(url);
+    } else {
+      throw 'Could not launch $url';
+    }
+  }
+
+  void _sendFeedback() async {
+    final mailtoLink = Mailto(
+      to: ['tretmine007@gmail.com'],
+      subject: 'Feedback: Petrolshare',
+    );
+
+    await launch('$mailtoLink');
+  }
   
 }
 
