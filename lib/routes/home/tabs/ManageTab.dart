@@ -35,11 +35,25 @@ class ManageTab extends StatelessWidget{
 
     return ListView(
       children: <Widget>[
-        NameAndIcon(_user, _handleLogout),
+        InkWell(
+          child: NameAndIcon(_user, _handleLogout),
+          onTap: () => Navigator.of(context).push(MaterialPageRoute(builder: (context) => AccountSettings(_user, _handleLogout))),
+        ),
         Divider(),
+        ListTile(
+          contentPadding: EdgeInsets.symmetric(horizontal: 30, vertical: 0),
+          leading: Icon(Icons.face),
+          title: Text('Account'),
+          onTap: () => Navigator.of(context).push(MaterialPageRoute(builder: (context) => AccountSettings(_user, _handleLogout))),
+        ),
+        Divider(),
+        Container(
+          child: Text(_pool.poolName, style: TextStyle(color: Colors.grey)),
+          padding: EdgeInsets.symmetric(vertical: 10, horizontal: 25),
+        ),
         OpenContainer(
           closedColor: Theme.of(context).scaffoldBackgroundColor,
-          openBuilder: (BuildContext _, VoidCallback openContainer) => AccountSettings(_user, _handleLogout),
+          openBuilder: (BuildContext _, VoidCallback openContainer) => MemberSettings(_pool),
           tappable: false,
           closedElevation: 0.0,
           closedBuilder: (BuildContext _, VoidCallback openContainer) {
@@ -48,120 +62,96 @@ class ManageTab extends StatelessWidget{
               children: <Widget>[
                 ListTile(
                   contentPadding: EdgeInsets.symmetric(horizontal: 30, vertical: 0),
-                  leading: Icon(Icons.face),
-                  title: Text('Account'),
+                  leading: Icon(Icons.supervisor_account),
+                  title: Text('Members'),
                   onTap: openContainer,
+                ),
+                Visibility(
+                  child: ListTile(
+                    contentPadding: EdgeInsets.symmetric(horizontal: 30, vertical: 0),
+                    leading: Icon(Icons.edit),
+                    title: Text('Set Poolname'),
+                    onTap: () => _handlePoolRenaming(context, _pool),
+                  ),
+                  visible: _user.role == 'admin' ?? false,
+                ),
+                ListTile(
+                  contentPadding: EdgeInsets.symmetric(horizontal: 30, vertical: 0),
+                  leading: Icon(Icons.clear),
+                  title: Text('Leave Pool'),
                 ),
                 Divider(),
                 Container(
-                  child: Text(_pool.poolName, style: TextStyle(color: Colors.grey)),
+                  child: Text("Pools", style: TextStyle(color: Colors.grey)),
                   padding: EdgeInsets.symmetric(vertical: 10, horizontal: 25),
                 ),
-                OpenContainer(
-                  closedColor: Theme.of(context).scaffoldBackgroundColor,
-                  openBuilder: (BuildContext _, VoidCallback openContainer) => MemberSettings(_pool),
-                  tappable: false,
-                  closedElevation: 0.0,
-                  closedBuilder: (BuildContext _, VoidCallback openContainer) {
-                    return Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: <Widget>[
-                        ListTile(
-                          contentPadding: EdgeInsets.symmetric(horizontal: 30, vertical: 0),
-                          leading: Icon(Icons.supervisor_account),
-                          title: Text('Members'),
-                          onTap: openContainer,
-                        ),
-                        Visibility(
-                          child: ListTile(
-                            contentPadding: EdgeInsets.symmetric(horizontal: 30, vertical: 0),
-                            leading: Icon(Icons.edit),
-                            title: Text('Set Poolname'),
-                            onTap: () => _handlePoolRenaming(context, _pool),
-                          ),
-                          visible: _user.role == 'admin' ?? false,
-                        ),
-                        ListTile(
-                          contentPadding: EdgeInsets.symmetric(horizontal: 30, vertical: 0),
-                          leading: Icon(Icons.clear),
-                          title: Text('Leave Pool'),
-                        ),
-                        Divider(),
-                        Container(
-                          child: Text("Pools", style: TextStyle(color: Colors.grey)),
-                          padding: EdgeInsets.symmetric(vertical: 10, horizontal: 25),
-                        ),
-                        Visibility(
-                          visible: _pool.pools.length > 1,
-                          child: ListTile(
-                            contentPadding: EdgeInsets.symmetric(horizontal: 30, vertical: 0),
-                            leading: Icon(Icons.loop),
-                            title: Text('Switch Pool'),
-                            onTap: () {
-                              Future<Map<String, String>> pools = _pool.fetchPoolSelection();
-                              pools.then((value) => poolSelection(context, value))
-                              .then((value) {
-                                if (value != null && value != _pool.pool) {
-                                  _pool.setPool(value).then((value) {
-                                    Scaffold.of(context).showSnackBar(
-                                      SnackBar(content: Text('Switched to ${_pool.poolName}'), duration: Duration(seconds: 2)));
-                                  });
-                                }
-                              });
-                            },
+                Visibility(
+                  visible: _pool.pools.length > 1,
+                  child: ListTile(
+                    contentPadding: EdgeInsets.symmetric(horizontal: 30, vertical: 0),
+                    leading: Icon(Icons.loop),
+                    title: Text('Switch Pool'),
+                    onTap: () {
+                      Future<Map<String, String>> pools = _pool.fetchPoolSelection();
+                      pools.then((value) => poolSelection(context, value))
+                      .then((value) {
+                        if (value != null && value != _pool.pool) {
+                          _pool.setPool(value).then((value) {
+                            Scaffold.of(context).showSnackBar(
+                              SnackBar(content: Text('Switched to ${_pool.poolName}'), duration: Duration(seconds: 2)));
+                          });
+                        }
+                      });
+                    },
+                  ),
+                ),
+                ListTile(
+                  contentPadding: EdgeInsets.symmetric(horizontal: 30, vertical: 0),
+                  leading: Icon(Icons.add_circle_outline),
+                  title: Text('Create New Pool'),
+                  onTap: () => _handlePoolCreation(context, _pool),
+                ),
+                Divider(),
+                ListTile(
+                  contentPadding: EdgeInsets.symmetric(horizontal: 30, vertical: 0),
+                  leading: Icon(Icons.feedback),
+                  title: Text('Feedback'),
+                  onTap: () => _sendFeedback(),
+                ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: <Widget>[
+                    Expanded(
+                      child: InkWell(
+                        onTap: () => _launchURL("http://www.docweirdo.de"),
+                        child: Align(
+                          alignment: Alignment.center,
+                          child: Padding(
+                            padding: EdgeInsets.symmetric(vertical: 15),
+                            child: Text("Data Policy", style: TextStyle(color: Colors.grey)),
                           ),
                         ),
-                        ListTile(
-                          contentPadding: EdgeInsets.symmetric(horizontal: 30, vertical: 0),
-                          leading: Icon(Icons.add_circle_outline),
-                          title: Text('Create New Pool'),
-                          onTap: () => _handlePoolCreation(context, _pool),
+                      ),
+                    ),
+                    Expanded(
+                      child: InkWell(
+                        onTap: () => _launchURL("http://www.docweirdo.de"),
+                        child: Align(
+                          alignment: Alignment.center,
+                            child: Padding(
+                            padding: EdgeInsets.symmetric(vertical: 15),
+                            child: Text("Terms of Service", style: TextStyle(color: Colors.grey)),
+                          ),
                         ),
-                        Divider(),
-                        ListTile(
-                          contentPadding: EdgeInsets.symmetric(horizontal: 30, vertical: 0),
-                          leading: Icon(Icons.feedback),
-                          title: Text('Feedback'),
-                          onTap: () => _sendFeedback(),
-                        ),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                          children: <Widget>[
-                            Expanded(
-                              child: InkWell(
-                                onTap: () => _launchURL("http://www.docweirdo.de"),
-                                child: Align(
-                                  alignment: Alignment.center,
-                                  child: Padding(
-                                    padding: EdgeInsets.symmetric(vertical: 15),
-                                    child: Text("Data Policy", style: TextStyle(color: Colors.grey)),
-                                  ),
-                                ),
-                              ),
-                            ),
-                            Expanded(
-                              child: InkWell(
-                                onTap: () => _launchURL("http://www.docweirdo.de"),
-                                child: Align(
-                                  alignment: Alignment.center,
-                                    child: Padding(
-                                    padding: EdgeInsets.symmetric(vertical: 15),
-                                    child: Text("Terms of Service", style: TextStyle(color: Colors.grey)),
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ]
-                        )
-                      ]
-                    );
-                  }
+                      ),
+                    ),
+                  ]
                 )
-              ],
+              ]
             );
           }
-        ),
-      ],
+        )
+      ]
     );
     
   }

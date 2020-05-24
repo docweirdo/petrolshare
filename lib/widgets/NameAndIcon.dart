@@ -19,7 +19,10 @@ class NameAndIcon extends StatelessWidget{
     return Row(
       children: <Widget>[
         Container(
-          child: _provideAvatar(context, user),
+          child: Hero(
+            child: _provideAvatar(context, user),
+            tag: "profilepic",
+          ),
           padding: EdgeInsets.symmetric(horizontal: 20, vertical: 20),            
         ),
         Expanded(
