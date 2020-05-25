@@ -253,8 +253,10 @@ class ManageTab extends StatelessWidget{
     if (poolname == null || poolname == pool.poolName) return;
 
     pool.data.renamePool(poolname, pool.pool).then((value) {
-      return Future<Map<String, String>>.delayed(Duration(seconds: 5), () => pool.fetchPoolSelection());
-    }).then((value) => Scaffold.of(context).showSnackBar(SnackBar(content: Text('Renamed pool to $poolname'))))
+      return Future<Map<String, String>>.delayed(
+        Duration(seconds: 5), () => pool.fetchPoolSelection());
+    }).then((_) => pool.notify())
+    .then((value) => Scaffold.of(context).showSnackBar(SnackBar(content: Text('Renamed pool to $poolname'))))
     .catchError((error) => Scaffold.of(context).showSnackBar(SnackBar(content: Text(error.toString()))));
 
   }

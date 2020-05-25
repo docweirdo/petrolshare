@@ -16,6 +16,8 @@ class AuthSevice{
     return _auth.onAuthStateChanged.asyncMap((FirebaseUser user) async{
       if (user == null) return null;
 
+      print("Auth state changed");
+
       DocumentReference userRef = Firestore.instance.collection('users').document(user.uid);
       DocumentSnapshot userDoc = await userRef.get();
 

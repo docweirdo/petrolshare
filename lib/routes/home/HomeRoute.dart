@@ -62,6 +62,8 @@ class _HomeRouteState extends State<HomeRoute> with RouteAware{
     _pool = Provider.of<Pool>(context);
     _user = _pool.user;
 
+    print("built homeRoute");
+
     return Scaffold(
       //backgroundColor: Theme.of(context).primaryColor,
       appBar: AppBar(

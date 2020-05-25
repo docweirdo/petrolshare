@@ -20,9 +20,20 @@ class Pool extends ChangeNotifier{
   Pool(this.user){
     data = DataService(user);
     data.updatedUserModel().listen((updatedUser) async { 
-      user.name = updatedUser.name;
-      if (user.photoURL != updatedUser.photoURL) await user.loadPhotoFromURL(updatedUser.photoURL);
-      notifyListeners();
+
+      bool changed = false;
+
+      if (user.name != updatedUser.name) {
+        changed = true;
+        user.name = updatedUser.name;
+      }
+      if (user.photoURL != updatedUser.photoURL){
+        await user.loadPhotoFromURL(updatedUser.photoURL);
+        changed = true;
+      } 
+      
+      if (changed) notifyListeners();
+      
     });
     }
 
@@ -36,19 +47,18 @@ class Pool extends ChangeNotifier{
     pools = {};
     if (!userDoc.exists){
       poolsRetrieved = 1;
-      notifyListeners();
       return pools;
     } 
     if (userDoc['membership'] == null || userDoc['membership'].isEmpty){
       poolsRetrieved = 1;
-      notifyListeners();
       return pools;
     }
     userDoc['membership'].forEach((key, value) => pools[key] = value);
     poolsRetrieved = pools.isEmpty ? 1 : 2;
-    notifyListeners();
     return pools;
   }
+
+  notify() => notifyListeners();
 
   //choose Pool
   Future<void> setPool(String poolID) async{

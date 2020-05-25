@@ -11,6 +11,8 @@ class Wrapper extends StatelessWidget{
 
   @override
   Widget build(BuildContext context){
+
+    print("built wrapper");
     
     return Consumer<UserModel>(
       builder: (_, user, child) {

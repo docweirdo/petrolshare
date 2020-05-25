@@ -48,7 +48,7 @@ class _AccountSettingsState extends State<AccountSettings>
   @override
   Widget build(BuildContext context) {
     WidgetsBinding.instance.addPostFrameCallback((_) => Future.delayed(
-        Duration(milliseconds: 100), () => _controller.forward()));
+        Duration(milliseconds: 400), () => _controller.forward()));
 
     return WillPopScope(
       onWillPop: () {

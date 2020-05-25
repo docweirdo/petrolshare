@@ -45,7 +45,6 @@ enum ContainerTransitionType {
 /// [closedBuilder] exist in the tree at the same time. Therefore, the widgets
 /// returned by these builders cannot include the same global key.
 ///
-// TODO(goderbauer): Add example animations and sample code.
 ///
 /// See also:
 ///

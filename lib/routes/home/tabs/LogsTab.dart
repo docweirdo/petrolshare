@@ -15,7 +15,7 @@ class LogsTab extends StatelessWidget{
   Widget build(BuildContext context){
     return Consumer<LogList>(
       builder: (context, loglist, _) {
-        if (loglist == null) return Container();    //TODO: Add Empty LogList Screen
+        if (loglist == null) return Container();    
         else if (loglist.hasBeenCalled) return _buildLogList(context, loglist);
         else return Center(child: CircularProgressIndicator());
       }

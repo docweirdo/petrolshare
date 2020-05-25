@@ -33,6 +33,8 @@ class PoolWrapper extends StatelessWidget{
   @override
   Widget build(BuildContext context){
 
+    print("built PoolWrapper");
+
     Pool _pool = Provider.of<Pool>(context);
 
     if (_pool.poolsRetrieved == 0){

@@ -17,6 +17,7 @@ class DataService{
   Stream<UserModel>  updatedUserModel() {
     DocumentReference userRef = _firestore.collection('users').document(_user.uid);
     return userRef.snapshots().map((userDoc) {
+      print("User infos Changed");
       if (!userDoc.exists) return _user;
       else return UserModel(_user.uid, userDoc['name'], userDoc['photoURL'], true, _user.role, _user.identifier);
     });
