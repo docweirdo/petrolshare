@@ -10,7 +10,6 @@ class AuthSevice{
   final FirebaseAuth _auth = FirebaseAuth.instance;
   final GoogleSignIn _googleSignIn = GoogleSignIn();
 
-
   // auth change user stream
   Stream<UserModel> get user {
     return _auth.onAuthStateChanged.asyncMap((FirebaseUser user) async{
@@ -94,11 +93,24 @@ class AuthSevice{
   // register with Google
 
   // sign out
-  Future signOut() {
-    return _auth.signOut().catchError((error) {
-      print(error);
+  Future signOut() async {
+
+    bool googleUser = await _googleSignIn.isSignedIn();
+
+    try{
+
+      if (googleUser){
+        await _googleSignIn.signOut();
+      }
+
+      return _auth.signOut();
+
+    }catch (e){
+      print("AuthService, Logout: " + e.toString());
+
       return null;
-    });
+    }
+
   }
 
 }
