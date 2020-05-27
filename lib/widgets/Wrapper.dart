@@ -5,12 +5,18 @@ import 'package:petrolshare/routes/home/HomeRoute.dart';
 import 'package:petrolshare/routes/authenticate/AuthenticateRoute.dart';
 import 'package:petrolshare/states/Pool.dart';
 import 'package:provider/provider.dart';
+import 'package:petrolshare/services/auth.dart';
 
 
 class Wrapper extends StatelessWidget{
 
+  final AuthSevice _auth = AuthSevice();
+
   @override
   Widget build(BuildContext context){
+
+  
+    _auth.signInSilentlyGoogle();
 
     print("built wrapper");
     
