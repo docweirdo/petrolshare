@@ -37,7 +37,7 @@ class PoolWrapper extends StatelessWidget{
 
     Pool _pool = Provider.of<Pool>(context);
 
-    if (_pool.poolsRetrieved == 0){
+    if (_pool.poolState == PoolState.notstarted){
       Future<Map<String, String>> pools = _pool.fetchPoolSelection();
       pools.then((value) => poolSelection(context, value))
       .then((value) {if (value != null) _pool.setPool(value);});
@@ -48,11 +48,30 @@ class PoolWrapper extends StatelessWidget{
   Widget _figureOutTab(Pool _pool){
 
     if (_selectedIndex == 2) 
-    return (_pool.poolsRetrieved == 2 ? _widgetOptions[_selectedIndex] : _fakeWidgetOptions[2]);
-    else{
+    return (_pool.poolState == PoolState.selected ? _widgetOptions[_selectedIndex] : _fakeWidgetOptions[_selectedIndex]);
+    else {
+
+      Widget childWidget;
+
+      switch (_pool.poolState) {
+        case PoolState.notstarted:
+          childWidget = _fakeWidgetOptions[0];
+          break;
+        case PoolState.nopools:
+          childWidget = _fakeWidgetOptions[1];
+          break;
+        case PoolState.retrieved:
+          childWidget = _fakeWidgetOptions[1];
+          break;
+        case PoolState.selected:
+          childWidget = _widgetOptions[_selectedIndex];
+          break;
+      }
+
       return ChangeNotifierProvider<LogList>.value(
         value: _pool.logList,
-        child: _pool.poolsRetrieved == 2 ? _widgetOptions[_selectedIndex] : _fakeWidgetOptions[_pool.poolsRetrieved]);
+        child: childWidget,
+      );
     }
 
   }

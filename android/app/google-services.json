@@ -15,19 +15,19 @@
       },
       "oauth_client": [
         {
+          "client_id": "785042572577-ot3goanc28r07486fc8qc86m404iu6r4.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "de.docweirdo.petrolshare",
+            "certificate_hash": "29484800ac9140cd17bfd181d1fcfe669376984f"
+          }
+        },
+        {
           "client_id": "785042572577-2v4jc44spblsra9ohr3o8q94sagj90t6.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {
             "package_name": "de.docweirdo.petrolshare",
             "certificate_hash": "39173ea60f17f2e57b262da9557f0b8dedc05c18"
-          }
-        },
-        {
-          "client_id": "785042572577-angisgfmk00g1u57sq4d2dcpkb95p7hl.apps.googleusercontent.com",
-          "client_type": 1,
-          "android_info": {
-            "package_name": "de.docweirdo.petrolshare",
-            "certificate_hash": "44d32dad35ed3ee323ff289e211f227422d03fe9"
           }
         },
         {

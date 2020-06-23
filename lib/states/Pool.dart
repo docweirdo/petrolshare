@@ -4,6 +4,13 @@ import 'package:petrolshare/models/UserModel.dart';
 import 'package:petrolshare/services/data.dart';
 import 'package:petrolshare/states/LogList.dart';
 
+enum PoolState{
+  notstarted,
+  nopools,
+  retrieved,
+  selected
+}
+
 class Pool extends ChangeNotifier{
 
   DataService data;
@@ -12,8 +19,7 @@ class Pool extends ChangeNotifier{
   LogList logList;
   Map<String, String> pools;
   String pool;
-  int poolsRetrieved = 0; //0-notstarted 1-nopools 2-sucess
-  
+  PoolState poolState = PoolState.notstarted;
 
   String get poolName => pools == null ? null : pools[pool];
 
@@ -46,15 +52,15 @@ class Pool extends ChangeNotifier{
     DocumentSnapshot userDoc = await _getUserInfo();
     pools = {};
     if (!userDoc.exists){
-      poolsRetrieved = 1;
+      poolState = PoolState.nopools;
       return pools;
     } 
     if (userDoc['membership'] == null || userDoc['membership'].isEmpty){
-      poolsRetrieved = 1;
+      poolState = PoolState.nopools;
       return pools;
     }
     userDoc['membership'].forEach((key, value) => pools[key] = value);
-    poolsRetrieved = pools.isEmpty ? 1 : 2;
+    poolState = pools.isEmpty ? PoolState.nopools : PoolState.retrieved;
     return pools;
   }
 
@@ -74,6 +80,7 @@ class Pool extends ChangeNotifier{
     logList = LogList(_firebase.document('pools/$poolID'));
     await logList.fetchPoolMembers();
     user.role = logList.members[user.uid].role;     //Set Rule of the global UserModel depending on Pool
+    poolState = PoolState.selected;
     notifyListeners();
     logList.refreshLogs();  //maybe switch aroung the last to? is there a difference?
   }

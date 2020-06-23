@@ -19,7 +19,7 @@ class ListEditTile extends StatelessWidget{
       contentPadding: EdgeInsets.symmetric(horizontal: 30, vertical: 5),
       leading: leadingIcon,
       trailing: Icon(Icons.edit),
-      onTap: editCallback,
+      onTap: () => editCallback(context),
       title: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[

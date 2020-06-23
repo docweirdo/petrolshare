@@ -25,7 +25,13 @@ class MyApp extends StatelessWidget {
           primaryColor: Colors.white,
           accentColor: Colors.deepOrange[300],
           primaryTextTheme: Typography.blackCupertino,
-          textTheme: Typography.blackCupertino
+          textTheme: Typography.blackCupertino,
+          bottomSheetTheme: BottomSheetThemeData(
+            backgroundColor: Colors.white,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.vertical(top: Radius.circular(10))
+            ),
+          ),
         ),
       ),
     );

@@ -11,6 +11,7 @@ import 'package:spiffy_button/spiffy_button.dart';
 
 
 
+
 final duration = const Duration(milliseconds: 250);
 
 
@@ -39,7 +40,7 @@ class _HomeRouteState extends State<HomeRoute> with RouteAware{
   void animate() async {
     final pause = const Duration(milliseconds: 100);
 
-    if(_pool != null && _pool.poolsRetrieved == 2) {
+    if(_pool != null && _pool.poolState == PoolState.selected) {
       await Future.delayed(pause);
       _fabKey.currentState.pose = SpiffyButtonPose.shownIconAndLabel;
     }
@@ -148,7 +149,7 @@ class _HomeRouteState extends State<HomeRoute> with RouteAware{
             );
           }
         ),
-        visible: (_fabVisible && (_pool.poolsRetrieved == 2)),
+        visible: (_fabVisible && (_pool.poolState == PoolState.selected)),
       )
     );
   }

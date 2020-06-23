@@ -131,7 +131,7 @@ class _AccountSettingsState extends State<AccountSettings>
               onTap: () => Navigator.of(context)
                   .push(MaterialPageRoute(builder: (context) => SignIn())),
             ),
-            visible: !widget.user.isAnonymous,
+            visible: widget.user.isAnonymous,
           ),
         ]),
       ),
@@ -156,11 +156,77 @@ class _AccountSettingsState extends State<AccountSettings>
     );
   }
 
-  void _handleNamechange() {
+  void _handleNamechange(BuildContext context) async {
+
+    final _formKey = GlobalKey<FormState>();
+    String username;
+
+    showModalBottomSheet(
+      context: context, 
+      isScrollControlled: true,
+      builder: (BuildContext context) {
+        return SingleChildScrollView(
+          child: Container(
+            padding: EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
+            child: Container(
+              padding: EdgeInsets.all(25),
+              child: Column(
+                children: <Widget>[
+                  Container(
+                    alignment: Alignment.centerLeft,
+                    child: Text("Enter your new username.")
+                  ),
+                  Form(
+                    key: _formKey,
+                    autovalidate: true,
+                    child: Column(
+                      children: <Widget>[
+                        TextFormField(
+                          enableInteractiveSelection: false,
+                          autofocus: true,
+                          autocorrect: false,
+                          //decoration: InputDecoration(),
+                          maxLength: 15,
+                          initialValue: widget.user.name,
+                          onSaved: (newValue) => username=newValue,
+                          validator: (value) {
+                            if (value.isEmpty) return 'Required';
+                            return null;
+                          },
+                          textInputAction: TextInputAction.done,
+                        ),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.end,
+                          children: <Widget>[
+                            FlatButton(
+                              child: Text("Cancel"),
+                              onPressed: () => Navigator.pop(context),
+                            ),
+                            FlatButton(
+                              child: Text("Rename"),
+                              onPressed: (){
+                                if (_formKey.currentState.validate()){
+                                  _formKey.currentState.save();
+                                }
+                                Navigator.pop(context);
+                              },
+                            )
+                          ],
+                        ),
+                      ],
+                    )
+                  ),
+                ],
+              ),
+            ),
+          ),
+        );
+      }
+    );
     print("handling stuff");
   }
 
-  void _handleInfochange() {
+  void _handleInfochange(BuildContext context) {
     print("handling stuff");
   }
 
