@@ -37,14 +37,14 @@ class ManageTab extends StatelessWidget{
       children: <Widget>[
         InkWell(
           child: NameAndIcon(_user, _handleLogout),
-          onTap: () => Navigator.of(context).push(MaterialPageRoute(builder: (context) => AccountSettings(_user, _handleLogout))),
+          onTap: () => Navigator.of(context).push(MaterialPageRoute(builder: (context) => AccountSettings(_handleLogout, _pool, _user))),
         ),
         Divider(),
         ListTile(
           contentPadding: EdgeInsets.symmetric(horizontal: 30, vertical: 0),
           leading: Icon(Icons.face),
           title: Text('Account'),
-          onTap: () => Navigator.of(context).push(MaterialPageRoute(builder: (context) => AccountSettings(_user, _handleLogout))),
+          onTap: () => Navigator.of(context).push(MaterialPageRoute(builder: (context) => AccountSettings(_handleLogout, _pool, _user))),
         ),
         Divider(),
         Container(

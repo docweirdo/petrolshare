@@ -8,8 +8,9 @@ class ListEditTile extends StatelessWidget{
   final String title;
   final String info;
   final Icon leadingIcon;
+  final List<dynamic> args;
 
-  ListEditTile({@required this.info, @required this.title, @required this.leadingIcon, @required this.editCallback});
+  ListEditTile({@required this.info, @required this.title, @required this.leadingIcon, @required this.editCallback, this.args = const []});
 
   @override
   Widget build(BuildContext context) {
@@ -19,7 +20,12 @@ class ListEditTile extends StatelessWidget{
       contentPadding: EdgeInsets.symmetric(horizontal: 30, vertical: 5),
       leading: leadingIcon,
       trailing: Icon(Icons.edit),
-      onTap: () => editCallback(context),
+      onTap: () {
+        if (args.isNotEmpty){
+          editCallback(context, args);
+        }
+        else editCallback(context);
+      },
       title: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[

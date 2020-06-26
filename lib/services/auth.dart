@@ -127,4 +127,27 @@ class AuthSevice {
       return null;
     }
   }
+
+  Future<void> changeUsername(String username) async{
+
+    FirebaseUser user = await _auth.currentUser();
+
+    UserUpdateInfo updateInfo = UserUpdateInfo();
+
+    updateInfo.displayName = username;
+
+    try{
+      await user.updateProfile(updateInfo);
+    } catch (e){
+      return Future.error(e);
+    }
+
+    DocumentReference userRef =
+          Firestore.instance.collection('users').document(user.uid);
+
+    return userRef.updateData({"name": username});
+
+  }
+
+
 }

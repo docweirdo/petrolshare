@@ -2,14 +2,20 @@ import 'package:animations/animations.dart';
 import 'package:flutter/material.dart';
 import 'package:petrolshare/models/UserModel.dart';
 import 'package:petrolshare/routes/authenticate/SignIn.dart';
+import 'package:petrolshare/services/auth.dart';
+import 'package:petrolshare/states/Pool.dart';
 import 'package:petrolshare/widgets/ListEditTile.dart';
+import 'package:petrolshare/widgets/TextFieldModalSheet.dart';
+import 'package:provider/provider.dart';
 
 class AccountSettings extends StatefulWidget {
   final Function logoutCallback;
+  final AuthSevice _auth = AuthSevice();
+  final Pool _pool;
+  final UserModel _user;
 
-  final UserModel user;
 
-  AccountSettings(this.user, this.logoutCallback);
+  AccountSettings(this.logoutCallback, this._pool, this._user);
 
   @override
   _AccountSettingsState createState() => _AccountSettingsState();
@@ -47,6 +53,7 @@ class _AccountSettingsState extends State<AccountSettings>
 
   @override
   Widget build(BuildContext context) {
+
     WidgetsBinding.instance.addPostFrameCallback((_) => Future.delayed(
         Duration(milliseconds: 400), () => _controller.forward()));
 
@@ -77,7 +84,7 @@ class _AccountSettingsState extends State<AccountSettings>
                   margin: EdgeInsets.all(30),
                   padding: EdgeInsets.all(30),
                   child: Hero(
-                      child: _provideAvatar(context, widget.user),
+                      child: _provideAvatar(context, widget._user),
                       tag: "profilepic"),
                 ),
                 Positioned(
@@ -113,15 +120,16 @@ class _AccountSettingsState extends State<AccountSettings>
           ListEditTile(
               leadingIcon: Icon(Icons.face),
               editCallback: _handleNamechange,
-              title: widget.user.name,
-              info: "Name"),
+              title: widget._user.name,
+              info: "Name",
+              args: [widget._user.name]),
           Visibility(
             child: ListEditTile(
                 leadingIcon: Icon(Icons.info_outline),
                 editCallback: _handleInfochange,
-                title: widget.user.identifier,
+                title: widget._user.identifier,
                 info: "Email/Phone"),
-            visible: !widget.user.isAnonymous,
+            visible: !widget._user.isAnonymous,
           ),
           Visibility(
             child: ListTile(
@@ -131,7 +139,7 @@ class _AccountSettingsState extends State<AccountSettings>
               onTap: () => Navigator.of(context)
                   .push(MaterialPageRoute(builder: (context) => SignIn())),
             ),
-            visible: widget.user.isAnonymous,
+            visible: widget._user.isAnonymous,
           ),
         ]),
       ),
@@ -156,74 +164,34 @@ class _AccountSettingsState extends State<AccountSettings>
     );
   }
 
-  void _handleNamechange(BuildContext context) async {
+  void _handleNamechange(BuildContext context, List<dynamic> args) async {
 
-    final _formKey = GlobalKey<FormState>();
-    String username;
-
-    showModalBottomSheet(
+    String entry = await showModalBottomSheet(
       context: context, 
       isScrollControlled: true,
       builder: (BuildContext context) {
-        return SingleChildScrollView(
-          child: Container(
-            padding: EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
-            child: Container(
-              padding: EdgeInsets.all(25),
-              child: Column(
-                children: <Widget>[
-                  Container(
-                    alignment: Alignment.centerLeft,
-                    child: Text("Enter your new username.")
-                  ),
-                  Form(
-                    key: _formKey,
-                    autovalidate: true,
-                    child: Column(
-                      children: <Widget>[
-                        TextFormField(
-                          enableInteractiveSelection: false,
-                          autofocus: true,
-                          autocorrect: false,
-                          //decoration: InputDecoration(),
-                          maxLength: 15,
-                          initialValue: widget.user.name,
-                          onSaved: (newValue) => username=newValue,
-                          validator: (value) {
-                            if (value.isEmpty) return 'Required';
-                            return null;
-                          },
-                          textInputAction: TextInputAction.done,
-                        ),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.end,
-                          children: <Widget>[
-                            FlatButton(
-                              child: Text("Cancel"),
-                              onPressed: () => Navigator.pop(context),
-                            ),
-                            FlatButton(
-                              child: Text("Rename"),
-                              onPressed: (){
-                                if (_formKey.currentState.validate()){
-                                  _formKey.currentState.save();
-                                }
-                                Navigator.pop(context);
-                              },
-                            )
-                          ],
-                        ),
-                      ],
-                    )
-                  ),
-                ],
-              ),
-            ),
-          ),
+        return TextFieldModalSheet(
+          title: "Enter your new username.",
+          confirmLabel: "Rename",
+          maxLength: 30,
+          initialText: args[0],
+          callback: (value){
+            if (value.isEmpty) return 'Required';
+            return null;
+          },
         );
       }
     );
-    print("handling stuff");
+
+    if (entry == null) return;
+
+    entry = entry.trim();
+
+    if (entry == args[0]) return;
+
+    widget._auth.changeUsername(entry).then( (v) => Scaffold.of(context).showSnackBar(SnackBar(content: Text('Username changed.'))))
+    .catchError((e) => Scaffold.of(context).showSnackBar(SnackBar(content: Text('Something went wrong.'))));
+
   }
 
   void _handleInfochange(BuildContext context) {
