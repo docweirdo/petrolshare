@@ -1,20 +1,25 @@
- 
- import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 
-class TextFieldModalSheet extends StatelessWidget{
-  
+class TextFieldModalSheet extends StatelessWidget {
   final String title;
   final String confirmLabel;
   final Function callback;
   final int maxLength;
   final String initialText;
+  final _formFieldKey;
 
-  TextFieldModalSheet({@required this.title, @required this.confirmLabel, @required this.callback, this.maxLength = 0, this.initialText = ''});
+  TextFieldModalSheet(
+      {@required this.title,
+      @required this.confirmLabel,
+      @required this.callback,
+      this.maxLength = 0,
+      this.initialText = ''}) : _formFieldKey = GlobalKey<FormFieldState>();
 
-  @override 
-  build(BuildContext context){
+  @override
+  build(BuildContext context) {
 
-    final _formKey = GlobalKey<FormState>();
+    print("built ModalSheet");
+
     String result;
 
     return SingleChildScrollView(
@@ -34,15 +39,65 @@ class TextFieldModalSheet extends StatelessWidget{
                   accentColor: Theme.of(context).primaryColor,
                   primaryColor: Theme.of(context).accentColor,
                 ),
-                child: Form(
+                child: Column(
+                  children: <Widget>[
+                    TextFormField(
+                      autovalidate: false,
+                      key: _formFieldKey,
+                      enableInteractiveSelection: false,
+                      enableSuggestions: false,
+                      //autofocus: true,
+                      autocorrect: false,
+                      maxLength: maxLength,
+                      decoration: InputDecoration(
+                        border: UnderlineInputBorder(),
+                        contentPadding: EdgeInsets.only(bottom: -20),
+                      ),
+                      initialValue: initialText,
+                      validator: (value) => callback(value),
+                      textInputAction: TextInputAction.done,
+                      onSaved: (value) {
+                        result = value;
+                      },
+                      onEditingComplete: () {
+                        if (_formFieldKey.currentState.validate()) {
+                          _formFieldKey.currentState.save();
+                          Navigator.pop(context, result);
+                        }
+                      },
+                    ),
+                    ButtonBar(
+                      buttonPadding: EdgeInsets.only(right: 0),
+                      children: <Widget>[
+                        FlatButton(
+                          child: Text("Cancel", style: TextStyle(fontSize: 15)),
+                          onPressed: () => Navigator.pop(context),
+                          padding: EdgeInsets.only(right: 10),
+                        ),
+                        FlatButton(
+                          child: Text(confirmLabel,
+                              style: TextStyle(fontSize: 15)),
+                          onPressed: () {
+                            if (_formFieldKey.currentState.validate()) {
+                              _formFieldKey.currentState.save();
+                              Navigator.pop(context, result);
+                            }
+                          },
+                        )
+                      ],
+                    ),
+                  ],
+                ),
+                /*child: Form(
                   key: _formKey,
                   autovalidate: true,
                   child: Column(
                     children: <Widget>[
                       TextFormField(
-                        enableInteractiveSelection: true,
-                        autofocus: true,
+                        enableInteractiveSelection: false,
+                        //autofocus: false,
                         autocorrect: false,
+                        enableSuggestions: false,
                         maxLength: maxLength,
                         decoration: InputDecoration(
                           border: UnderlineInputBorder(),
@@ -74,13 +129,12 @@ class TextFieldModalSheet extends StatelessWidget{
                       ),
                     ],
                   )
-                ),
+                ),*/
               ),
             ],
           ),
         ),
       ),
     );
-      
   }
 }

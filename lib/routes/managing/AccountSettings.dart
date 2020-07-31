@@ -14,7 +14,6 @@ class AccountSettings extends StatefulWidget {
   final Pool _pool;
   final UserModel _user;
 
-
   AccountSettings(this.logoutCallback, this._pool, this._user);
 
   @override
@@ -53,7 +52,6 @@ class _AccountSettingsState extends State<AccountSettings>
 
   @override
   Widget build(BuildContext context) {
-
     WidgetsBinding.instance.addPostFrameCallback((_) => Future.delayed(
         Duration(milliseconds: 400), () => _controller.forward()));
 
@@ -97,7 +95,9 @@ class _AccountSettingsState extends State<AccountSettings>
                       );
                     },
                     child: Visibility(
-                      visible: _controller.status != AnimationStatus.dismissed && buttonVisible,
+                      visible:
+                          _controller.status != AnimationStatus.dismissed &&
+                              buttonVisible,
                       child: RawMaterialButton(
                         onPressed: _handlePicchange,
                         elevation: 2.0,
@@ -165,23 +165,27 @@ class _AccountSettingsState extends State<AccountSettings>
   }
 
   void _handleNamechange(BuildContext context, List<dynamic> args) async {
+    print("called showModalBottomSheet");
+
+    String oldName = args[0];
 
     String entry = await showModalBottomSheet(
-      context: context, 
-      isScrollControlled: true,
-      builder: (BuildContext context) {
-        return TextFieldModalSheet(
-          title: "Enter your new username.",
-          confirmLabel: "Rename",
-          maxLength: 30,
-          initialText: args[0],
-          callback: (value){
-            if (value.isEmpty) return 'Required';
-            return null;
-          },
-        );
-      }
-    );
+        context: context,
+        isScrollControlled: true,
+        builder: (BuildContext context) {
+          return TextFieldModalSheet(
+            title: "Enter your new username.",
+            confirmLabel: "Rename",
+            maxLength: 30,
+            initialText: oldName,
+            callback: (value) {
+              if (value.isEmpty) return 'Required';
+              if (value.trim() == oldName)
+                return 'Old and new username are identical';
+              return null;
+            },
+          );
+        });
 
     if (entry == null) return;
 
@@ -189,9 +193,12 @@ class _AccountSettingsState extends State<AccountSettings>
 
     if (entry == args[0]) return;
 
-    widget._auth.changeUsername(entry).then( (v) => Scaffold.of(context).showSnackBar(SnackBar(content: Text('Username changed.'))))
-    .catchError((e) => Scaffold.of(context).showSnackBar(SnackBar(content: Text('Something went wrong.'))));
-
+    widget._auth
+        .changeUsername(entry)
+        .then((v) => Scaffold.of(context)
+            .showSnackBar(SnackBar(content: Text('Username changed.'))))
+        .catchError((e) => Scaffold.of(context)
+            .showSnackBar(SnackBar(content: Text('Something went wrong.'))));
   }
 
   void _handleInfochange(BuildContext context) {
