@@ -1,37 +1,45 @@
 import 'package:flutter/material.dart';
 
-class TextFieldModalSheet extends StatelessWidget {
+class TextFieldModalSheet extends StatefulWidget {
   final String title;
   final String confirmLabel;
   final Function callback;
   final int maxLength;
   final String initialText;
-  final _formFieldKey;
+  //final _formFieldKey;
 
   TextFieldModalSheet(
       {@required this.title,
       @required this.confirmLabel,
       @required this.callback,
       this.maxLength = 0,
-      this.initialText = ''}) : _formFieldKey = GlobalKey<FormFieldState>();
+      this.initialText = ''});
+  //: _formFieldKey = GlobalKey<FormFieldState>();
+
+  @override
+  _TextFieldModalSheetState createState() => _TextFieldModalSheetState();
+}
+
+class _TextFieldModalSheetState extends State<TextFieldModalSheet> {
+  final _formFieldKey = GlobalKey<FormFieldState>();
 
   @override
   build(BuildContext context) {
-
     print("built ModalSheet");
 
     String result;
 
     return SingleChildScrollView(
       child: Container(
-        padding: EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
+        padding:
+            EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
         child: Container(
           padding: EdgeInsets.fromLTRB(25, 25, 25, 10),
           child: Column(
             children: <Widget>[
               Container(
                 alignment: Alignment.centerLeft,
-                child: Text(title, style: TextStyle(fontSize: 18)),
+                child: Text(widget.title, style: TextStyle(fontSize: 18)),
                 padding: EdgeInsets.only(bottom: 10),
               ),
               Theme(
@@ -46,15 +54,15 @@ class TextFieldModalSheet extends StatelessWidget {
                       key: _formFieldKey,
                       enableInteractiveSelection: false,
                       enableSuggestions: false,
-                      //autofocus: true,
+                      autofocus: true,
                       autocorrect: false,
-                      maxLength: maxLength,
+                      maxLength: widget.maxLength,
                       decoration: InputDecoration(
                         border: UnderlineInputBorder(),
                         contentPadding: EdgeInsets.only(bottom: -20),
                       ),
-                      initialValue: initialText,
-                      validator: (value) => callback(value),
+                      initialValue: widget.initialText,
+                      validator: (value) => widget.callback(value),
                       textInputAction: TextInputAction.done,
                       onSaved: (value) {
                         result = value;
@@ -75,7 +83,7 @@ class TextFieldModalSheet extends StatelessWidget {
                           padding: EdgeInsets.only(right: 10),
                         ),
                         FlatButton(
-                          child: Text(confirmLabel,
+                          child: Text(widget.confirmLabel,
                               style: TextStyle(fontSize: 15)),
                           onPressed: () {
                             if (_formFieldKey.currentState.validate()) {
