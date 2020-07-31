@@ -4,6 +4,7 @@ import 'package:petrolshare/models/UserModel.dart';
 import 'package:petrolshare/routes/authenticate/SignIn.dart';
 import 'package:petrolshare/services/auth.dart';
 import 'package:petrolshare/states/Pool.dart';
+import 'package:petrolshare/widgets/CountDownButton.dart';
 import 'package:petrolshare/widgets/ListEditTile.dart';
 import 'package:petrolshare/widgets/TextFieldModalSheet.dart';
 import 'package:provider/provider.dart';
@@ -126,7 +127,7 @@ class _AccountSettingsState extends State<AccountSettings>
           Visibility(
             child: ListEditTile(
                 leadingIcon: Icon(Icons.info_outline),
-                editCallback: _handleInfochange,
+                editCallback: _handleIdentifierchange,
                 title: widget._user.identifier,
                 info: "Email/Phone"),
             visible: !widget._user.isAnonymous,
@@ -141,6 +142,12 @@ class _AccountSettingsState extends State<AccountSettings>
             ),
             visible: widget._user.isAnonymous,
           ),
+          ListTile(
+            contentPadding: EdgeInsets.symmetric(horizontal: 30, vertical: 0),
+            leading: Icon(Icons.delete),
+            title: Text('Delete Account', style: TextStyle(fontSize: 18)),
+            onTap: _handleAccountDeletion,
+          )
         ]),
       ),
     );
@@ -201,11 +208,56 @@ class _AccountSettingsState extends State<AccountSettings>
             .showSnackBar(SnackBar(content: Text('Something went wrong.'))));
   }
 
-  void _handleInfochange(BuildContext context) {
+  void _handleIdentifierchange(BuildContext context) {
     print("handling stuff");
   }
 
   void _handlePicchange() {
     print("handling stuff");
+  }
+
+  void _handleAccountDeletion() async {
+    bool result = await showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          titlePadding: EdgeInsets.all(20),
+          contentPadding: EdgeInsets.symmetric(horizontal: 20, vertical: 5),
+          actionsPadding: EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+          title: Text("Delete Account"),
+          content: Text("Are you sure you want to delete your account? All your data will be lost."),
+          actions: <Widget>[
+            FlatButton(
+              child: Text("Cancel", style: TextStyle(fontSize: 15)),
+              onPressed: () {
+                Navigator.of(context).pop(false);
+              },
+            ),
+            Container(
+              width: 130.0,
+              alignment: Alignment.center,
+              child: CountDownButton(
+                title: "Delete Account", 
+                callback: () => Navigator.of(context).pop(true),
+              ),
+            ),
+          ],
+        );
+      },
+    );
+
+    if (result == true){
+      try{
+        await widget._auth.deleteAccount();
+        Navigator.of(context).pop();
+      } catch (e){
+        
+        print(e);
+        //caffold.of(context)
+        //    .showSnackBar(SnackBar(content: Text('Something went wrong.')));
+      }
+      
+    }
+
   }
 }

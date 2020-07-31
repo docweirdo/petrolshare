@@ -16,7 +16,7 @@ class Wrapper extends StatelessWidget{
   Widget build(BuildContext context){
 
   
-    _auth.signInSilentlyGoogle();
+    //_auth.signInSilentlyGoogle(); Why is this here
 
     print("built wrapper");
     

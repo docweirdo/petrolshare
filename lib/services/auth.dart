@@ -83,7 +83,7 @@ class AuthSevice {
           .signInWithCredential(credential)
           .then((AuthResult result) => result.user);
     } catch (e) {
-      print("AuthService, Silent Google Sign in failed:" + e.toString());
+      print("AuthService, Silent Google Sign in failed: " + e.toString());
     }
 
     if (user == null) {
@@ -114,10 +114,13 @@ class AuthSevice {
   // sign out
   Future signOut() async {
     bool googleUser = await _googleSignIn.isSignedIn();
+    FirebaseUser user = await _auth.currentUser();
 
     try {
       if (googleUser) {
         await _googleSignIn.signOut();
+      } else if (user.isAnonymous){
+        return user.delete();
       }
 
       return _auth.signOut();
@@ -147,6 +150,22 @@ class AuthSevice {
 
     return userRef.updateData({"name": username});
 
+  }
+
+  Future<void> deleteAccount() async{
+
+    FirebaseUser user = await _auth.currentUser();
+
+    bool googleUser = await _googleSignIn.isSignedIn();
+    
+
+    if (googleUser){
+      await _googleSignIn.signOut();
+    }
+
+    await user.delete();
+
+    return;
   }
 
 

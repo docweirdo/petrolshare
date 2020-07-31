@@ -353,7 +353,7 @@ class ManageTab extends StatelessWidget{
       return pool.fetchPoolSelection();
     }).then((poolList) => pool.setPool(poolID))
       .then((value) {
-        Scaffold.of(context).showSnackBar(SnackBar(content: Text('Created pool $poolname')));
+        Scaffold.of(context).showSnackBar(SnackBar(content: Text('Created pool "$poolname"')));
         return;
       }).catchError((e) => Scaffold.of(context).showSnackBar(SnackBar(content: Text(e.toString()))));
 

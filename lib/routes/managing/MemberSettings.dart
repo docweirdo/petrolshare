@@ -45,18 +45,11 @@ class MemberSettings extends StatelessWidget {
                     ),
                     FittedBox(
                       fit: BoxFit.scaleDown,
-                      child: Text(userList[i].role),
+                      child: Text(userList[i].role[0].toUpperCase() + userList[i].role.substring(1)),
                     ),
                   ]
                 ),
               ),
-              Container(
-                child: IconButton(
-                  icon: Icon(Icons.exit_to_app),
-                  onPressed: () => {} ,
-                ),
-                padding: EdgeInsets.only(right: 10),
-              )
             ],
           );
         }
