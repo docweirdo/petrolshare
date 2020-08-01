@@ -238,6 +238,10 @@ class ManageStrippedTab extends StatelessWidget{
 
     if (poolname == null) return;
 
+    poolname = poolname.trim();
+
+    if (poolname.length == 0) return;
+
     String poolID;
 
     pool.data.createPool(poolname).then((value) {

@@ -73,6 +73,7 @@ class LogList extends ChangeNotifier{
       _members = {};
       doc['members'].forEach((uid, properties) {
         _members[uid] = UserModel(uid, properties['name'], properties['photoURL'], true, properties['role']);
+        //assert(_members[uid].name != null);
         });
       return;
     }

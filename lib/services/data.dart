@@ -3,6 +3,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:cloud_functions/cloud_functions.dart';
 import 'package:petrolshare/models/UserModel.dart';
+import 'package:petrolshare/states/Pool.dart';
 
 class DataService{
 
@@ -52,11 +53,47 @@ class DataService{
 
   }
   
-  Future<void> renamePool(String poolname, String poolID) {
+  Future<void> renamePool(String poolname, Pool pool) {
 
-    DocumentReference poolRef = _firestore.collection('pools').document(poolID);
+    DocumentReference poolRef = _firestore.collection('pools').document(pool.pool);
 
-    return poolRef.updateData({'name': poolname});
+    return poolRef.updateData({'name': poolname}).then((value) => pool.pools[pool.pool] = poolname).then((value) => pool.notify());
+
+  }
+
+  Future<void> deletePool(Pool pool) async{
+  
+    HttpsCallable callable = cf.getHttpsCallable(functionName: 'deletePool');
+   
+    callable.timeout = const Duration(seconds: 30);
+    
+
+    try {
+      final HttpsCallableResult result = await callable.call(
+        <String, dynamic>{
+          'poolID': pool.pool
+        },
+      );
+      
+      pool.pools.remove(pool.pool);
+
+      pool.pool = null;
+
+      pool.poolState = PoolState.retrieved;
+
+      return null;
+
+    } on CloudFunctionsException catch (e) {
+        print('caught firebase functions exception');
+        print(e.code);
+        print(e.message);
+        print(e.details);
+      } catch (e) {
+        print('caught generic exception');
+        print(e);
+    }
+
+    throw Exception('Something went wrong');
 
   }
 

@@ -7,6 +7,7 @@ import 'package:flutter/widgets.dart';
 import 'package:petrolshare/routes/managing/MemberSettings.dart';
 import 'package:petrolshare/services/auth.dart';
 import 'package:petrolshare/states/Pool.dart';
+import 'package:petrolshare/widgets/CountDownButton.dart';
 import 'package:petrolshare/widgets/NameAndIcon.dart';
 import 'package:petrolshare/widgets/PoolList.dart';
 import 'package:provider/provider.dart';
@@ -79,6 +80,12 @@ class ManageTab extends StatelessWidget{
                   contentPadding: EdgeInsets.symmetric(horizontal: 30, vertical: 0),
                   leading: Icon(Icons.clear),
                   title: Text('Leave Pool'),
+                ),
+                ListTile(
+                  contentPadding: EdgeInsets.symmetric(horizontal: 30, vertical: 0),
+                  leading: Icon(Icons.delete),
+                  title: Text('Delete Pool'),
+                  onTap: () => _handlePoolDeletion(context, _pool),
                 ),
                 Divider(),
                 Container(
@@ -250,13 +257,13 @@ class ManageTab extends StatelessWidget{
       }
     );
 
-    if (poolname == null || poolname == pool.poolName) return;
+    if (poolname == null) return;
 
-    pool.data.renamePool(poolname, pool.pool).then((value) {
-      return Future<Map<String, String>>.delayed(
-        Duration(seconds: 5), () => pool.fetchPoolSelection());
-    }).then((_) => pool.notify())
-    .then((value) => Scaffold.of(context).showSnackBar(SnackBar(content: Text('Renamed pool to $poolname'))))
+    poolname = poolname.trim();
+
+    if (poolname == pool.poolName) return;
+
+    pool.data.renamePool(poolname, pool).then((value) => Scaffold.of(context).showSnackBar(SnackBar(content: Text('Renamed pool to $poolname'))))
     .catchError((error) => Scaffold.of(context).showSnackBar(SnackBar(content: Text(error.toString()))));
 
   }
@@ -346,6 +353,10 @@ class ManageTab extends StatelessWidget{
 
     if (poolname == null) return;
 
+    poolname = poolname.trim();
+
+    if (poolname.length == 0) return;
+
     String poolID;
 
     pool.data.createPool(poolname).then((value) {
@@ -357,6 +368,87 @@ class ManageTab extends StatelessWidget{
         return;
       }).catchError((e) => Scaffold.of(context).showSnackBar(SnackBar(content: Text(e.toString()))));
 
+  }
+
+  Future<void> _handlePoolDeletion(BuildContext context, Pool pool) async{
+
+    int memberCount = 0;
+
+    pool.logList.members.forEach((key, value) {
+      if (['member', 'admin'].contains(value.role)) memberCount++;});
+
+    if (memberCount > 1) {
+      Fluttertoast.showToast(
+        msg: "There are still users in this pool",
+        toastLength: Toast.LENGTH_LONG,
+        gravity: ToastGravity.BOTTOM,
+        timeInSecForIosWeb: 1,
+        textColor: Colors.white,
+        fontSize: 16.0
+      );
+      return;
+    }
+    
+    bool result = await showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          titlePadding: EdgeInsets.all(20),
+          contentPadding: EdgeInsets.symmetric(horizontal: 20, vertical: 5),
+          actionsPadding: EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+          title: Text("Delete Pool"),
+          content: Text("Are you sure you want to delete pool \"${pool.poolName}\"? All data will be lost."),
+          actions: <Widget>[
+            FlatButton(
+              child: Text("Cancel", style: TextStyle(fontSize: 15)),
+              onPressed: () {
+                Navigator.of(context).pop(false);
+              },
+            ),
+            Container(
+              width: 130.0,
+              alignment: Alignment.center,
+              child: CountDownButton(
+                title: "Delete Pool", 
+                callback: () => Navigator.of(context).pop(true),
+              ),
+            ),
+          ],
+        );
+      },
+    );
+
+    if (result == true){
+      try{
+
+        await pool.data.deletePool(pool);
+
+        if (pool.pools.length > 0){
+          pool.pool = pool.pools.keys.first;
+          pool.notify();
+
+        } else {
+          String selection = await poolSelection(context, pool.pools);
+
+          if (selection != null && selection != pool.pool) {
+            pool.setPool(selection).then((value) {
+              Scaffold.of(context).showSnackBar(
+                SnackBar(content: Text('Switched to ${pool.poolName}'), duration: Duration(seconds: 2)));
+            });
+          } else {
+            pool.notify();
+          }
+
+        }
+
+      } catch (e){
+        
+        print(e);
+        Scaffold.of(context)
+            .showSnackBar(SnackBar(content: Text('Something went wrong.')));
+      }
+      
+    }
   }
 
   Future<String> poolSelection(BuildContext context, Map<String, String> pools){

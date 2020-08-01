@@ -53,10 +53,12 @@ class Pool extends ChangeNotifier{
     pools = {};
     if (!userDoc.exists){
       poolState = PoolState.nopools;
+      notifyListeners();
       return pools;
     } 
     if (userDoc['membership'] == null || userDoc['membership'].isEmpty){
       poolState = PoolState.nopools;
+      notifyListeners();
       return pools;
     }
     userDoc['membership'].forEach((key, value) => pools[key] = value);
