@@ -50,6 +50,25 @@ class MemberSettings extends StatelessWidget {
                   ]
                 ),
               ),
+              Container(
+                padding: EdgeInsets.only(right: 10),
+                child: PopupMenuButton<MemberAction>(
+                  child: Icon(Icons.more_vert),
+                  onSelected: (value) {
+                    if (value == MemberAction.Admin) _handleAdmin(userList[i].uid);
+                  },
+                  itemBuilder: (BuildContext context) => <PopupMenuEntry<MemberAction>>[
+                    const PopupMenuItem<MemberAction>(
+                      value: MemberAction.Admin,
+                      child: Text('Make admin'),
+                    ),
+                    const PopupMenuItem<MemberAction>(
+                      value: MemberAction.Delete,
+                      child: Text('Remove'),
+                    )
+                  ],
+                ),
+              ),
             ],
           );
         }
@@ -74,7 +93,15 @@ class MemberSettings extends StatelessWidget {
   }
 
 
-
+  void _handleAdmin(String uid) async{
+    try{
+      await pool.data.makeAdmin(uid, pool.pool);
+    } catch (e){
+      SnackBar(content: Text('Something went wrong.'));
+    }
+  }
 
 
 }
+
+enum MemberAction{Admin, Delete}
