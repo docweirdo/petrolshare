@@ -58,6 +58,7 @@ class ManageStrippedTab extends StatelessWidget{
             leading: Icon(Icons.loop),
             title: Text('Switch Pool'),
             onTap: () {
+              PoolState currentState = _pool.poolState;
               Future<Map<String, String>> pools = _pool.fetchPoolSelection();
               pools.then((value) => poolSelection(context, value))
               .then((value) {
@@ -66,6 +67,8 @@ class ManageStrippedTab extends StatelessWidget{
                     Scaffold.of(context).showSnackBar(
                       SnackBar(content: Text('Switched to ${_pool.poolName}'), duration: Duration(seconds: 2)));
                   });
+                } else {
+                  _pool.poolState = currentState;
                 }
               });
             },

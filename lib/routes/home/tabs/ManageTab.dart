@@ -99,6 +99,7 @@ class ManageTab extends StatelessWidget{
                     leading: Icon(Icons.loop),
                     title: Text('Switch Pool'),
                     onTap: () {
+                      PoolState currentState = _pool.poolState;
                       Future<Map<String, String>> pools = _pool.fetchPoolSelection();
                       pools.then((value) => poolSelection(context, value))
                       .then((value) {
@@ -107,6 +108,8 @@ class ManageTab extends StatelessWidget{
                             Scaffold.of(context).showSnackBar(
                               SnackBar(content: Text('Switched to ${_pool.poolName}'), duration: Duration(seconds: 2)));
                           });
+                        } else {
+                          _pool.poolState = currentState;
                         }
                       });
                     },
@@ -424,8 +427,11 @@ class ManageTab extends StatelessWidget{
         await pool.data.deletePool(pool);
 
         if (pool.pools.length > 0){
-          pool.pool = pool.pools.keys.first;
-          pool.notify();
+          
+          pool.setPool(pool.pools.keys.first).then((value) {
+              Scaffold.of(context).showSnackBar(
+                SnackBar(content: Text('Switched to ${pool.poolName}'), duration: Duration(seconds: 2)));
+            });
 
         } else {
           String selection = await poolSelection(context, pool.pools);
