@@ -24,56 +24,96 @@ class CardListTile extends StatelessWidget{
         ),
         borderRadius: BorderRadius.circular(10),
       ),
-      child: Container(
-        margin: EdgeInsets.all(15),
-        child: Table(
-          defaultVerticalAlignment: TableCellVerticalAlignment.middle,
-          columnWidths: {0: IntrinsicColumnWidth(), 1: FlexColumnWidth()},
-          children: <TableRow>[
-            TableRow(
-              children: <Widget>[
-                Container(
-                  padding: EdgeInsets.only(right: 20),
-                  child: _provideAvatar(context, logModel),
-                ),
-                Text(_formatDate(logModel.date), style: TextStyle(fontSize: 20.0))
-              ],
+      child: IntrinsicHeight(
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Container(
+              margin: EdgeInsets.all(15),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: <Widget>[
+                  Row(
+                    children: <Widget>[
+                      Container(
+                        padding: EdgeInsets.only(right: 20),
+                        child: _provideAvatar(context, logModel),
+                      ),
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          
+                          Text(_formatDate(logModel.date), style: TextStyle(fontSize: 27)),
+                          Text(logModel.name, style: TextStyle(fontSize: 14),),
+                        ],
+                      ),
+                    ],
+                  ),
+                  Padding(padding: EdgeInsets.all(5)),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    children: <Widget>[
+                      Container(),
+                      Wrap(
+                        spacing: 8.0,
+                        runSpacing: -10.0,
+                        children: <Widget>[
+                          Chip(
+                            avatar: Icon(Icons.euro_symbol),
+                            label: Text(_formatNumbers(logModel.price)),
+                            labelPadding: EdgeInsets.only(right: 5),
+                            padding: EdgeInsets.symmetric(horizontal: 2),
+                          ),
+                          Chip(
+                            avatar: Icon(Icons.invert_colors),
+                            label: Text(_formatNumbers(logModel.amount)),
+                            labelPadding: EdgeInsets.only(right: 5),
+                            padding: EdgeInsets.symmetric(horizontal: 2),
+                          ),
+                          Chip(
+                            avatar: Icon(Icons.slow_motion_video),
+                            label: Text(_formatNumbers(logModel.roadmeter)),
+                            labelPadding: EdgeInsets.only(right: 5),
+                            padding: EdgeInsets.symmetric(horizontal: 2),
+                          ),
+                        ],
+                      )
+                    ]
+                  ),
+                  Divider(),
+                  Visibility(
+                    visible: logModel.notes != null,
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      crossAxisAlignment: CrossAxisAlignment.baseline,
+                      textBaseline: TextBaseline.ideographic,
+                      children: <Widget>[
+                        Text("Note: ", style: TextStyle(fontSize: 18)),
+                        Text(logModel.notes ?? '')
+                      ],
+                    ),
+                  )
+                ],
+              ),
             ),
-            TableRow(
-              children: <Widget>[
-                Container(),
-                Wrap(
-                  spacing: 8.0,
-                  runSpacing: -10.0,
+            Expanded(
+              child: Container(
+                margin: EdgeInsets.all(0),
+                padding: EdgeInsets.all(0),
+                decoration: new BoxDecoration(
+                  color: Colors.grey[100],
+                  borderRadius: BorderRadius.circular(5)
+                ),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
                   children: <Widget>[
-                    Chip(
-                      avatar: Icon(Icons.euro_symbol),
-                      label: Text(_formatNumbers(logModel.price)),
-                      labelPadding: EdgeInsets.only(right: 5),
-                      padding: EdgeInsets.symmetric(horizontal: 2),
-                    ),
-                    Chip(
-                      avatar: Icon(Icons.invert_colors),
-                      label: Text(_formatNumbers(logModel.amount)),
-                      labelPadding: EdgeInsets.only(right: 5),
-                      padding: EdgeInsets.symmetric(horizontal: 2),
-                    ),
-                    Chip(
-                      avatar: Icon(Icons.slow_motion_video),
-                      label: Text(_formatNumbers(logModel.roadmeter)),
-                      labelPadding: EdgeInsets.only(right: 5),
-                      padding: EdgeInsets.symmetric(horizontal: 2),
-                    ),
-                    Chip(
-                      avatar: Icon(Icons.face),
-                      label: Text(logModel.name),
-                      labelPadding: EdgeInsets.only(right: 5),
-                      padding: EdgeInsets.symmetric(horizontal: 2),
-                    ),
-                  ],
-                )
-              ]
-            )
+                    Text(_formatNumbers(logModel.price), style: TextStyle(fontSize: 30, fontWeight: FontWeight.bold,)),
+                    Text("Euro", style: TextStyle(fontSize: 14)),
+                  ]
+                ),
+              ),
+            ),
           ],
         ),
       ),
@@ -88,13 +128,13 @@ class CardListTile extends StatelessWidget{
       return CircleAvatar(
         backgroundColor: Colors.grey[100],
         //foregroundColor: Theme.of(context).accentColor,
-        radius: 28,
+        radius: 24,
         child: Text(logModel.name[0].toUpperCase(), style: TextStyle(fontSize: 30, fontWeight: FontWeight.bold,))
       );
     }
     return CircleAvatar(
       backgroundImage: MemoryImage(_user.photo),
-      radius: 28,
+      radius: 24,
     );
   }
 
