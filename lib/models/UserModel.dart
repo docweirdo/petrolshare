@@ -1,9 +1,7 @@
 import 'dart:typed_data';
 import 'package:http/http.dart' as http;
 
-
 class UserModel {
-
   String uid;
   String name;
   Uint8List photo;
@@ -13,20 +11,19 @@ class UserModel {
   String identifier;
   bool isAnonymous;
 
-  UserModel(this.uid, this.name, this.photoURL, this.inDatabase, this.role, [this.identifier, this.isAnonymous]){
+  UserModel(this.uid, this.name, this.photoURL, this.inDatabase, this.role,
+      [this.identifier, this.isAnonymous]) {
     loadPhotoFromURL(photoURL);
   }
 
   Future<void> loadPhotoFromURL(String url) async {
-    if (url != null){
-      try{
+    if (url != null) {
+      try {
         photoURL = url;
         photo = await http.readBytes(url, headers: {});
-      }
-      catch(e){
+      } catch (e) {
         print('Fetch Profile Pic: ' + e.toString());
       }
     }
   }
-
 }
