@@ -12,10 +12,8 @@ import 'package:provider/provider.dart';
 class AccountSettings extends StatefulWidget {
   final Function logoutCallback;
   final AuthSevice _auth = AuthSevice();
-  final Pool _pool;
-  final UserModel _user;
 
-  AccountSettings(this.logoutCallback, this._pool, this._user);
+  AccountSettings(this.logoutCallback);
 
   @override
   _AccountSettingsState createState() => _AccountSettingsState();
@@ -53,6 +51,9 @@ class _AccountSettingsState extends State<AccountSettings>
 
   @override
   Widget build(BuildContext context) {
+    Pool _pool = Provider.of<Pool>(context);
+    UserModel _user = _pool.user;
+
     WidgetsBinding.instance.addPostFrameCallback((_) => Future.delayed(
         Duration(milliseconds: 400), () => _controller.forward()));
 
@@ -83,8 +84,7 @@ class _AccountSettingsState extends State<AccountSettings>
                   margin: EdgeInsets.all(30),
                   padding: EdgeInsets.all(30),
                   child: Hero(
-                      child: _provideAvatar(context, widget._user),
-                      tag: "profilepic"),
+                      child: _provideAvatar(context, _user), tag: "profilepic"),
                 ),
                 Positioned(
                   child: AnimatedBuilder(
@@ -121,16 +121,16 @@ class _AccountSettingsState extends State<AccountSettings>
           ListEditTile(
               leadingIcon: Icon(Icons.face),
               editCallback: _handleNamechange,
-              title: widget._user.name,
+              title: _user.name,
               info: "Name",
-              args: [widget._user.name]),
+              args: [_user.name]),
           Visibility(
             child: ListEditTile(
                 leadingIcon: Icon(Icons.info_outline),
                 editCallback: _handleIdentifierchange,
-                title: widget._user.identifier,
+                title: _user.identifier,
                 info: "Email/Phone"),
-            visible: !widget._user.isAnonymous,
+            visible: !_user.isAnonymous,
           ),
           Visibility(
             child: ListTile(
@@ -140,7 +140,7 @@ class _AccountSettingsState extends State<AccountSettings>
               onTap: () => Navigator.of(context)
                   .push(MaterialPageRoute(builder: (context) => SignIn())),
             ),
-            visible: widget._user.isAnonymous,
+            visible: _user.isAnonymous,
           ),
           ListTile(
             contentPadding: EdgeInsets.symmetric(horizontal: 30, vertical: 0),

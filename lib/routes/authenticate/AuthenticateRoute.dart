@@ -7,10 +7,20 @@ class AuthenticateRoute extends StatefulWidget {
 }
 
 class _AuthenticateRouteState extends State<AuthenticateRoute> {
+  static const String _title = 'Petrolshare';
+
   @override
-  Widget build(BuildContext context){
-    return Container(
-      child: SignIn(),
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      title: _title,
+      home: Container(child: SignIn()),
+      debugShowCheckedModeBanner: false,
+      theme: ThemeData(
+        primaryColor: Colors.white,
+        accentColor: Colors.deepOrange[300],
+        primaryTextTheme: Typography.blackCupertino,
+        textTheme: Typography.blackCupertino,
+      ),
     );
   }
 }
