@@ -225,7 +225,8 @@ class _AccountSettingsState extends State<AccountSettings>
           contentPadding: EdgeInsets.symmetric(horizontal: 20, vertical: 5),
           actionsPadding: EdgeInsets.symmetric(horizontal: 10, vertical: 5),
           title: Text("Delete Account"),
-          content: Text("Are you sure you want to delete your account? All your data will be lost."),
+          content: Text(
+              "Are you sure you want to delete your account? All your data will be lost."),
           actions: <Widget>[
             FlatButton(
               child: Text("Cancel", style: TextStyle(fontSize: 15)),
@@ -237,7 +238,7 @@ class _AccountSettingsState extends State<AccountSettings>
               width: 130.0,
               alignment: Alignment.center,
               child: CountDownButton(
-                title: "Delete Account", 
+                title: "Delete Account",
                 callback: () => Navigator.of(context).pop(true),
               ),
             ),
@@ -246,18 +247,15 @@ class _AccountSettingsState extends State<AccountSettings>
       },
     );
 
-    if (result == true){
-      try{
+    if (result == true) {
+      try {
         await widget._auth.deleteAccount();
         Navigator.of(context).pop();
-      } catch (e){
-        
+      } catch (e) {
         print(e);
         //caffold.of(context)
         //    .showSnackBar(SnackBar(content: Text('Something went wrong.')));
       }
-      
     }
-
   }
 }
