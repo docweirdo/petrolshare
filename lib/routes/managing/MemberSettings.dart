@@ -56,6 +56,8 @@ class MemberSettings extends StatelessWidget {
                     onSelected: (value) {
                       if (value == MemberAction.Admin)
                         _handleAdmin(userList[i].uid, pool);
+                      if (value == MemberAction.Delete)
+                        _handleRemoval(userList[i].uid, pool);
                     },
                     itemBuilder: (BuildContext context) =>
                         <PopupMenuEntry<MemberAction>>[
@@ -97,6 +99,14 @@ class MemberSettings extends StatelessWidget {
   void _handleAdmin(String uid, Pool pool) async {
     try {
       await pool.data.makeAdmin(uid, pool.pool);
+    } catch (e) {
+      SnackBar(content: Text('Something went wrong.'));
+    }
+  }
+
+  void _handleRemoval(String uid, Pool pool) async {
+    try {
+      await pool.data.removeUserFromPool(uid, pool.pool);
     } catch (e) {
       SnackBar(content: Text('Something went wrong.'));
     }
