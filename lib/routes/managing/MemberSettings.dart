@@ -51,25 +51,28 @@ class MemberSettings extends StatelessWidget {
                 ),
                 Container(
                   padding: EdgeInsets.only(right: 10),
-                  child: PopupMenuButton<MemberAction>(
-                    child: Icon(Icons.more_vert),
-                    onSelected: (value) {
-                      if (value == MemberAction.Admin)
-                        _handleAdmin(userList[i].uid, pool);
-                      if (value == MemberAction.Delete)
-                        _handleRemoval(userList[i].uid, pool);
-                    },
-                    itemBuilder: (BuildContext context) =>
-                        <PopupMenuEntry<MemberAction>>[
-                      const PopupMenuItem<MemberAction>(
-                        value: MemberAction.Admin,
-                        child: Text('Make admin'),
-                      ),
-                      const PopupMenuItem<MemberAction>(
-                        value: MemberAction.Delete,
-                        child: Text('Remove'),
-                      )
-                    ],
+                  child: Visibility(
+                    visible: (userList[i].uid != pool.user.uid),
+                    child: PopupMenuButton<MemberAction>(
+                      child: Icon(Icons.more_vert),
+                      onSelected: (value) {
+                        if (value == MemberAction.Admin)
+                          _handleAdmin(userList[i].uid, pool);
+                        if (value == MemberAction.Delete)
+                          _handleRemoval(userList[i].uid, pool);
+                      },
+                      itemBuilder: (BuildContext context) =>
+                          <PopupMenuEntry<MemberAction>>[
+                        const PopupMenuItem<MemberAction>(
+                          value: MemberAction.Admin,
+                          child: Text('Make admin'),
+                        ),
+                        const PopupMenuItem<MemberAction>(
+                          value: MemberAction.Delete,
+                          child: Text('Remove'),
+                        )
+                      ],
+                    ),
                   ),
                 ),
               ],
@@ -106,7 +109,7 @@ class MemberSettings extends StatelessWidget {
 
   void _handleRemoval(String uid, Pool pool) async {
     try {
-      await pool.data.removeUserFromPool(uid, pool.pool);
+      await pool.data.removeUserFromPool(uid, pool);
     } catch (e) {
       SnackBar(content: Text('Something went wrong.'));
     }

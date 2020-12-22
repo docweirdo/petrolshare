@@ -80,6 +80,7 @@ class ManageTab extends StatelessWidget {
                         EdgeInsets.symmetric(horizontal: 30, vertical: 0),
                     leading: Icon(Icons.clear),
                     title: Text('Leave Pool'),
+                    onTap: () => _handleLeavePool(context, _user.uid, _pool),
                   ),
                   ListTile(
                     contentPadding:
@@ -436,6 +437,7 @@ class ManageTab extends StatelessWidget {
         await pool.data.deletePool(pool);
 
         if (pool.pools.length > 0) {
+          //TODO: warum nicht == 1? Genauso in _handleLeavePool
           pool.setPool(pool.pools.keys.first).then((value) {
             Scaffold.of(context).showSnackBar(SnackBar(
                 content: Text('Switched to ${pool.poolName}'),
@@ -477,6 +479,68 @@ class ManageTab extends StatelessWidget {
             content: PoolList(pools),
           );
         });
+  }
+
+  void _handleLeavePool(BuildContext context, String uid, Pool pool) async {
+    bool result = await showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          titlePadding: EdgeInsets.all(20),
+          contentPadding: EdgeInsets.symmetric(horizontal: 20, vertical: 5),
+          actionsPadding: EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+          title: Text("Leave Pool"),
+          content:
+              Text("Are you sure you want to leave pool \"${pool.poolName}\"?"),
+          actions: <Widget>[
+            FlatButton(
+              child: Text("Cancel", style: TextStyle(fontSize: 15)),
+              onPressed: () {
+                Navigator.of(context).pop(false);
+              },
+            ),
+            Container(
+              width: 130.0,
+              alignment: Alignment.center,
+              child: CountDownButton(
+                title: "Leave Pool",
+                callback: () => Navigator.of(context).pop(true),
+              ),
+            ),
+          ],
+        );
+      },
+    );
+
+    if (result == true) {
+      try {
+        await pool.data.removeUserFromPool(uid, pool);
+
+        if (pool.pools.length > 0) {
+          pool.setPool(pool.pools.keys.first).then((value) {
+            Scaffold.of(context).showSnackBar(SnackBar(
+                content: Text('Switched to ${pool.poolName}'),
+                duration: Duration(seconds: 2)));
+          });
+        } else {
+          String selection = await poolSelection(context, pool.pools);
+
+          if (selection != null && selection != pool.pool) {
+            pool.setPool(selection).then((value) {
+              Scaffold.of(context).showSnackBar(SnackBar(
+                  content: Text('Switched to ${pool.poolName}'),
+                  duration: Duration(seconds: 2)));
+            });
+          } else {
+            pool.notify();
+          }
+        }
+      } catch (e) {
+        print(e);
+        Scaffold.of(context)
+            .showSnackBar(SnackBar(content: Text('Something went wrong.')));
+      }
+    }
   }
 
   void _launchURL(String url) async {

@@ -110,7 +110,7 @@ class DataService {
     throw Exception('Something went wrong');
   }
 
-  Future<void> removeUserFromPool(String uid, String poolID) async {
+  Future<void> removeUserFromPool(String uid, Pool pool) async {
     HttpsCallable callable =
         cf.getHttpsCallable(functionName: 'removeUserFromPool');
 
@@ -118,8 +118,15 @@ class DataService {
 
     try {
       final HttpsCallableResult result = await callable.call(
-        <String, dynamic>{'poolID': poolID, 'uid': uid},
+        <String, dynamic>{'poolID': pool.pool, 'uid': uid},
       );
+
+      pool.pools.remove(pool.pool);
+
+      pool.pool = null;
+
+      pool.poolState = PoolState.retrieved;
+
       return;
     } on CloudFunctionsException catch (e) {
       print('caught firebase functions exception');
