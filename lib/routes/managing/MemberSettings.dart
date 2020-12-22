@@ -57,9 +57,9 @@ class MemberSettings extends StatelessWidget {
                       child: Icon(Icons.more_vert),
                       onSelected: (value) {
                         if (value == MemberAction.Admin)
-                          _handleAdmin(userList[i].uid, pool);
+                          _handleAdmin(userList[i], pool);
                         if (value == MemberAction.Delete)
-                          _handleRemoval(userList[i].uid, pool);
+                          _handleRemoval(userList[i], pool);
                       },
                       itemBuilder: (BuildContext context) =>
                           <PopupMenuEntry<MemberAction>>[
@@ -99,17 +99,20 @@ class MemberSettings extends StatelessWidget {
     );
   }
 
-  void _handleAdmin(String uid, Pool pool) async {
+  void _handleAdmin(UserModel user, Pool pool) async {
     try {
-      await pool.data.makeAdmin(uid, pool.pool);
+      await pool.data.makeAdmin(user.uid, pool.pool);
     } catch (e) {
       SnackBar(content: Text('Something went wrong.'));
     }
   }
 
-  void _handleRemoval(String uid, Pool pool) async {
+  void _handleRemoval(UserModel user, Pool pool) async {
     try {
-      await pool.data.removeUserFromPool(uid, pool);
+      await pool.data.removeUserFromPool(user.uid, pool);
+
+      pool.logList.removePoolMember(user);
+      pool.notify();
     } catch (e) {
       SnackBar(content: Text('Something went wrong.'));
     }

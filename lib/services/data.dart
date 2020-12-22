@@ -121,12 +121,6 @@ class DataService {
         <String, dynamic>{'poolID': pool.pool, 'uid': uid},
       );
 
-      pool.pools.remove(pool.pool);
-
-      pool.pool = null;
-
-      pool.poolState = PoolState.retrieved;
-
       return;
     } on CloudFunctionsException catch (e) {
       print('caught firebase functions exception');

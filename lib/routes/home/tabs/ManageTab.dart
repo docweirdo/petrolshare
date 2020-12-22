@@ -516,6 +516,12 @@ class ManageTab extends StatelessWidget {
       try {
         await pool.data.removeUserFromPool(uid, pool);
 
+        pool.pools.remove(pool.pool);
+
+        pool.pool = null;
+
+        pool.poolState = PoolState.retrieved;
+
         if (pool.pools.length > 0) {
           pool.setPool(pool.pools.keys.first).then((value) {
             Scaffold.of(context).showSnackBar(SnackBar(

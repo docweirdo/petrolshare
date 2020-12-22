@@ -81,9 +81,6 @@ class _NewEntryRouteState extends State<NewEntryRoute> {
                         return null;
                       },
                       textInputAction: TextInputAction.next,
-                      onFieldSubmitted: (v) {
-                        FocusScope.of(context).nextFocus();
-                      },
                       onChanged: (value) {
                         setState(() {
                           roadmeter = double.parse(value.replaceAll(',', '.'));
@@ -107,9 +104,6 @@ class _NewEntryRouteState extends State<NewEntryRoute> {
                         return null;
                       },
                       textInputAction: TextInputAction.next,
-                      onFieldSubmitted: (v) {
-                        FocusScope.of(context).nextFocus();
-                      },
                       onChanged: (value) {
                         setState(() {
                           amount = double.parse(value.replaceAll(',', '.'));
@@ -133,9 +127,6 @@ class _NewEntryRouteState extends State<NewEntryRoute> {
                         return null;
                       },
                       textInputAction: TextInputAction.done,
-                      onFieldSubmitted: (v) {
-                        FocusScope.of(context).nextFocus();
-                      },
                       onChanged: (value) {
                         setState(() {
                           price = double.parse(value.replaceAll(',', '.'));

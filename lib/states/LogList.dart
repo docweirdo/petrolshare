@@ -71,4 +71,8 @@ class LogList extends ChangeNotifier {
     } else
       throw "Pool $_pool.documentID members field doesn't exist";
   }
+
+  void removePoolMember(UserModel user) {
+    _members.remove(user.uid);
+  }
 }
