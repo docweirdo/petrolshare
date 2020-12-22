@@ -35,69 +35,80 @@ class CardListTile extends StatelessWidget {
               child: Container(
                 decoration:
                     BoxDecoration(color: Theme.of(context).primaryColor),
-                padding: EdgeInsets.all(15),
+                padding: EdgeInsets.fromLTRB(
+                    15, 15, 0, 15), //padding to the right individually
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   crossAxisAlignment: CrossAxisAlignment.start,
                   mainAxisSize: MainAxisSize.min,
                   children: <Widget>[
-                    Row(
-                      children: <Widget>[
-                        Container(
-                          padding: EdgeInsets.only(right: 20),
-                          child: _provideAvatar(context, logModel),
-                        ),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              FittedBox(
-                                fit: BoxFit.fitWidth,
-                                child: Text(_formatDate(logModel.date),
-                                    style: TextStyle(fontSize: 27)),
-                              ),
-                              Text(
-                                logModel.name,
-                                style: TextStyle(fontSize: 14),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ],
-                    ),
-                    Padding(padding: EdgeInsets.all(5)),
-                    Row(
-                        mainAxisAlignment: MainAxisAlignment.start,
+                    Padding(
+                      padding: EdgeInsets.only(right: 15),
+                      child: Row(
                         children: <Widget>[
-                          //Container(),
+                          Container(
+                            padding: EdgeInsets.only(right: 20),
+                            child: _provideAvatar(context, logModel),
+                          ),
                           Expanded(
-                            child: Wrap(
-                              spacing: 8.0,
-                              runSpacing: -10.0,
-                              children: <Widget>[
-                                Chip(
-                                  avatar: Icon(Icons.euro_symbol),
-                                  label: Text(_formatNumbers(logModel.price)),
-                                  labelPadding: EdgeInsets.only(right: 5),
-                                  padding: EdgeInsets.symmetric(horizontal: 2),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                FittedBox(
+                                  fit: BoxFit.fitWidth,
+                                  child: Text(_formatDate(logModel.date),
+                                      style: TextStyle(fontSize: 27)),
                                 ),
-                                Chip(
-                                  avatar: Icon(Icons.invert_colors),
-                                  label: Text(_formatNumbers(logModel.amount)),
-                                  labelPadding: EdgeInsets.only(right: 5),
-                                  padding: EdgeInsets.symmetric(horizontal: 2),
-                                ),
-                                Chip(
-                                  avatar: Icon(Icons.slow_motion_video),
-                                  label:
-                                      Text(_formatNumbers(logModel.roadmeter)),
-                                  labelPadding: EdgeInsets.only(right: 5),
-                                  padding: EdgeInsets.symmetric(horizontal: 2),
+                                Text(
+                                  logModel.name,
+                                  style: TextStyle(fontSize: 14),
                                 ),
                               ],
                             ),
                           ),
-                        ]),
+                        ],
+                      ),
+                    ),
+                    Padding(padding: EdgeInsets.all(5)),
+                    Padding(
+                      padding: EdgeInsets.only(right: 5.0),
+                      child: Row(
+                          mainAxisAlignment: MainAxisAlignment.start,
+                          children: <Widget>[
+                            //Container(),
+                            Expanded(
+                              child: Wrap(
+                                spacing: 8.0,
+                                runSpacing: -10.0,
+                                children: <Widget>[
+                                  Chip(
+                                    avatar: Icon(Icons.euro_symbol),
+                                    label: Text(_formatNumbers(logModel.price)),
+                                    labelPadding: EdgeInsets.only(right: 5),
+                                    padding:
+                                        EdgeInsets.symmetric(horizontal: 2),
+                                  ),
+                                  Chip(
+                                    avatar: Icon(Icons.local_gas_station),
+                                    label:
+                                        Text(_formatNumbers(logModel.amount)),
+                                    labelPadding: EdgeInsets.only(right: 5),
+                                    padding:
+                                        EdgeInsets.symmetric(horizontal: 2),
+                                  ),
+                                  Chip(
+                                    avatar: Icon(Icons.slow_motion_video),
+                                    label: Text(
+                                        _formatNumbers(logModel.roadmeter)),
+                                    labelPadding: EdgeInsets.only(right: 5),
+                                    padding:
+                                        EdgeInsets.symmetric(horizontal: 2),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ]),
+                    ),
                     Visibility(
                       visible: logModel.notes != null && logModel.notes != '',
                       child: Divider(),
