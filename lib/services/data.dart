@@ -1,29 +1,56 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:cloud_functions/cloud_functions.dart';
+import 'package:flutter/material.dart';
 import 'package:petrolshare/models/UserModel.dart';
 import 'package:petrolshare/states/Pool.dart';
 
 class DataService {
-  final UserModel _user;
   final CloudFunctions cf = CloudFunctions(region: 'europe-west1');
 
-  DataService(this._user);
+  static Firestore _firestore = Firestore.instance;
 
-  Firestore _firestore = Firestore.instance;
-
-  Stream<UserModel> updatedUserModel() {
+  static Stream<UserModel> updatedUserModel(UserModel user, Pool pool) {
     DocumentReference userRef =
-        _firestore.collection('users').document(_user.uid);
+        _firestore.collection('users').document(user.uid);
     return userRef.snapshots().map((userDoc) {
-      print("User infos Changed");
+      debugPrint("User Document has Changed");
       if (!userDoc.exists)
-        return _user;
-      else
-        return UserModel(_user.uid, userDoc['name'], userDoc['photoURL'], true,
-            _user.role, _user.identifier);
+        return user;
+      else if (userDoc['membership'] != null &&
+          !userDoc['membership'].isEmpty) {
+        return UserModel(user.uid, userDoc['name'], userDoc['photoURL'],
+            role: pool == null ? null : userDoc['membership.${pool.id}'],
+            identifier:
+                userDoc['identifier'] ?? userDoc['email'] ?? userDoc['phone'],
+            membership: Map.from(userDoc['membership']));
+      } else {
+        return UserModel(user.uid, userDoc['name'], userDoc['photoURL'],
+            identifier:
+                userDoc['identifier'] ?? userDoc['email'] ?? userDoc['phone']);
+      }
     });
   }
 
+// TODO: How to handle anonymity?
+  static Future<UserModel> getUserModel(String uid, Pool pool) async {
+    DocumentSnapshot userDoc = await _firestore.document('users/$uid').get();
+
+    if (!userDoc.exists) return null;
+
+    if (userDoc['membership'] != null && !userDoc['membership'].isEmpty) {
+      return UserModel(uid, userDoc['name'], userDoc['photoURL'],
+          role: pool == null ? null : userDoc['membership.${pool.id}'],
+          identifier:
+              userDoc['identifier'] ?? userDoc['email'] ?? userDoc['phone'],
+          membership: Map.from(userDoc['membership']));
+    } else {
+      return UserModel(uid, userDoc['name'], userDoc['photoURL'],
+          identifier:
+              userDoc['identifier'] ?? userDoc['email'] ?? userDoc['phone']);
+    }
+  }
+
+/*
   Future<String> createPool(String poolname) async {
     HttpsCallable callable = cf.getHttpsCallable(functionName: 'createPool');
 
@@ -134,4 +161,5 @@ class DataService {
 
     throw Exception('Something went wrong');
   }
+  */
 }

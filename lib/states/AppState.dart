@@ -1,4 +1,3 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:petrolshare/models/UserModel.dart';
@@ -42,24 +41,5 @@ class AppState extends ChangeNotifier {
 
       notifyListeners();
     });
-  }
-
-  //get List of possible Pools
-  Future<Map<String, String>> fetchPoolSelection() async {
-    DocumentSnapshot userDoc = await _getUserInfo();
-    pools = {};
-    if (!userDoc.exists) {
-      poolState = PoolState.nopools;
-      notifyListeners();
-      return pools;
-    }
-    if (userDoc['membership'] == null || userDoc['membership'].isEmpty) {
-      poolState = PoolState.nopools;
-      notifyListeners();
-      return pools;
-    }
-    userDoc['membership'].forEach((key, value) => pools[key] = value);
-    poolState = pools.isEmpty ? PoolState.nopools : PoolState.retrieved;
-    return pools;
   }
 }
