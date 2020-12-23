@@ -14,40 +14,36 @@ class DataService {
         _firestore.collection('users').document(user.uid);
     return userRef.snapshots().map((userDoc) {
       debugPrint("User Document has Changed");
-      if (!userDoc.exists)
-        return user;
-      else if (userDoc['membership'] != null &&
-          !userDoc['membership'].isEmpty) {
-        return UserModel(user.uid, userDoc['name'], userDoc['photoURL'],
-            role: pool == null ? null : userDoc['membership.${pool.id}'],
-            identifier:
-                userDoc['identifier'] ?? userDoc['email'] ?? userDoc['phone'],
-            membership: Map.from(userDoc['membership']));
-      } else {
-        return UserModel(user.uid, userDoc['name'], userDoc['photoURL'],
-            identifier:
-                userDoc['identifier'] ?? userDoc['email'] ?? userDoc['phone']);
-      }
+      if (!userDoc.exists) return user;
+      return fromUserDoc(user.uid, pool, userDoc);
     });
   }
 
-// TODO: How to handle anonymity?
   static Future<UserModel> getUserModel(String uid, Pool pool) async {
     DocumentSnapshot userDoc = await _firestore.document('users/$uid').get();
 
     if (!userDoc.exists) return null;
 
-    if (userDoc['membership'] != null && !userDoc['membership'].isEmpty) {
-      return UserModel(uid, userDoc['name'], userDoc['photoURL'],
-          role: pool == null ? null : userDoc['membership.${pool.id}'],
-          identifier:
-              userDoc['identifier'] ?? userDoc['email'] ?? userDoc['phone'],
-          membership: Map.from(userDoc['membership']));
-    } else {
-      return UserModel(uid, userDoc['name'], userDoc['photoURL'],
-          identifier:
-              userDoc['identifier'] ?? userDoc['email'] ?? userDoc['phone']);
-    }
+    return fromUserDoc(uid, pool, userDoc);
+  }
+
+  /// Takes a Firebase User Document converts it to a UserModel
+  static UserModel fromUserDoc(
+      String uid, Pool pool, DocumentSnapshot userDoc) {
+    if (!userDoc.exists) return null;
+
+    Map<String, String> membership;
+    String identifier =
+        userDoc['identifier'] ?? userDoc['email'] ?? userDoc['phone'];
+
+    if (userDoc['membership'] != null && userDoc['membership'].isNotEmpty)
+      membership = Map.from(userDoc['membership']);
+
+    return UserModel(uid, userDoc['name'], userDoc['photoURL'],
+        role: pool == null ? null : userDoc['membership.${pool.id}'],
+        identifier: identifier,
+        isAnonymous: identifier == null,
+        membership: membership);
   }
 
 /*

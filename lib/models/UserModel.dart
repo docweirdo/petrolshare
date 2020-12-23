@@ -6,7 +6,7 @@ enum UserRole { Admin, Member, FormerMember }
 class UserModel {
   String uid;
   String name;
-  Uint8List photo;
+  Uint8List _photo;
   String photoURL;
   UserRole role;
   String identifier;
@@ -15,13 +15,13 @@ class UserModel {
 
   UserModel(this.uid, this.name, this.photoURL,
       {this.role, this.identifier, this.isAnonymous, this.membership}) {
-    loadPhotoFromURL(photoURL);
+    photo = photoURL;
   }
 
   UserModel.roleString(this.uid, this.name, this.photoURL,
       {String role, this.identifier, this.isAnonymous, this.membership}) {
     roleString = role;
-    loadPhotoFromURL(photoURL);
+    photo = photoURL;
   }
 
   set roleString(String roleString) {
@@ -56,11 +56,15 @@ class UserModel {
     }
   }
 
+  set photo(String photoURL) {
+    loadPhotoFromURL(photoURL);
+  }
+
   Future<void> loadPhotoFromURL(String url) async {
     if (url != null) {
       try {
         photoURL = url;
-        photo = await http.readBytes(url, headers: {});
+        _photo = await http.readBytes(url, headers: {});
       } catch (e) {
         print('Fetch Profile Pic: ' + e.toString());
       }
