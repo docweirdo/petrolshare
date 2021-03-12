@@ -1,6 +1,6 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:petrolshare/models/UserModel.dart';
-import 'package:petrolshare/widgets/Wrapper.dart';
+import 'package:petrolshare/Wrapper.dart';
 import 'package:provider/provider.dart';
 import 'package:petrolshare/services/auth.dart';
 
@@ -10,7 +10,7 @@ void main() => runApp(MyApp());
 class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return StreamProvider<UserModel>.value(
+    return StreamProvider<FirebaseUser>.value(
       value: AuthSevice().user,
       child: Wrapper(),
     );

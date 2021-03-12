@@ -8,7 +8,7 @@ class AuthSevice {
   static final GoogleSignIn _googleSignIn = GoogleSignIn();
 
   // auth change user stream
-  static Stream<FirebaseUser> get user {
+  Stream<FirebaseUser> get user {
     debugPrint("AuthService, user state changed");
     return _auth.onAuthStateChanged;
   }

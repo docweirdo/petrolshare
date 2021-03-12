@@ -10,8 +10,18 @@ enum LogState { notstarted, nologs, retrieved }
 class Pool extends ChangeNotifier {
   String id;
 
-  Map<String, String> members = {};
+  Map<String, UserModel> members = {};
 
   LogState logState = LogState.notstarted;
   List<LogModel> logs = [];
+
+  /// Updates the ID of the current Pool and listens to changed members
+  void update(id) async {
+    this.id = id;
+    DataService.streamPoolMembers(id).listen(onUpdatedMembers);
+  }
+
+  void onUpdatedMembers(Map<String, UserModel> newMembersMap) {
+    // TODO: check changes and decide for notifyListeners
+  }
 }

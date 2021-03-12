@@ -8,14 +8,15 @@ enum PoolState { notstarted, nopools, retrieved, selected }
 
 class AppState extends ChangeNotifier {
   PoolState poolState = PoolState.notstarted;
-  Pool selectedPool;
+  String selectedPool;
   Map<String, String> availablePools;
 
   UserModel _user;
 
   /// Updates the [AppState] and contained [UserModel] when the Firebase User has changed.
   void update(FirebaseUser authUser) async {
-    UserModel user = await DataService.getUserModel(authUser.uid, selectedPool);
+    UserModel user =
+        await DataService.getUserModel(authUser.uid, poolID: selectedPool);
 
     // Incase a new user is created and the cloudfunction hasn't fired yet
     user ??= UserModel(
@@ -27,7 +28,8 @@ class AppState extends ChangeNotifier {
             : (authUser.email ?? authUser.phoneNumber),
         isAnonymous: authUser.isAnonymous);
 
-    DataService.updatedUserModel(user, selectedPool).listen(onUpdatedUserModel);
+    DataService.updatedUserModel(user, pool: selectedPool)
+        .listen(onUpdatedUserModel);
   }
 
 // TODO: This function will need to decide which change warrants [notifyListeners()]

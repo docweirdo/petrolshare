@@ -9,27 +9,31 @@ class DataService {
 
   static Firestore _firestore = Firestore.instance;
 
-  static Stream<UserModel> updatedUserModel(UserModel user, Pool pool) {
+  /// Takes a [UserModel] and a [Pool] and listens to changes to the UserDoc.
+  ///
+  /// Returns a Stream of an updated UserModel using [getUserModel(String uid, String poolID)].
+  static Stream<UserModel> updatedUserModel(UserModel user, {String poolID}) {
     DocumentReference userRef =
         _firestore.collection('users').document(user.uid);
     return userRef.snapshots().map((userDoc) {
       debugPrint("User Document has Changed");
       if (!userDoc.exists) return user;
-      return fromUserDoc(user.uid, pool, userDoc);
+      return fromUserDoc(user.uid, userDoc, poolID: poolID);
     });
   }
 
-  static Future<UserModel> getUserModel(String uid, Pool pool) async {
+  /// Retrieves the UserModel corresponding to an [UID].
+  static Future<UserModel> getUserModel(String uid, {String poolID}) async {
     DocumentSnapshot userDoc = await _firestore.document('users/$uid').get();
 
     if (!userDoc.exists) return null;
 
-    return fromUserDoc(uid, pool, userDoc);
+    return fromUserDoc(uid, userDoc, poolID: poolID);
   }
 
   /// Takes a Firebase User Document converts it to a UserModel
-  static UserModel fromUserDoc(
-      String uid, Pool pool, DocumentSnapshot userDoc) {
+  static UserModel fromUserDoc(String uid, DocumentSnapshot userDoc,
+      {String poolID}) {
     if (!userDoc.exists) return null;
 
     Map<String, String> membership;
@@ -40,10 +44,15 @@ class DataService {
       membership = Map.from(userDoc['membership']);
 
     return UserModel(uid, userDoc['name'], userDoc['photoURL'],
-        role: pool == null ? null : userDoc['membership.${pool.id}'],
+        role: poolID == null ? null : userDoc['membership.$poolID'],
         identifier: identifier,
         isAnonymous: identifier == null,
         membership: membership);
+  }
+
+  /// Streams a Map following changes of Membership or Members of Pool with ID [poolID].
+  static Stream<Map<String, UserModel>> streamPoolMembers(String poolID) {
+    // TODO: Listen to Poolmembers
   }
 
 /*
