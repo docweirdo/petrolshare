@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:cloud_functions/cloud_functions.dart';
 import 'package:flutter/material.dart';
+import 'package:petrolshare/models/LogModel.dart';
 import 'package:petrolshare/models/UserModel.dart';
 import 'package:petrolshare/states/Pool.dart';
 
@@ -12,7 +13,7 @@ class DataService {
   /// Takes a [UserModel] and a [Pool] and listens to changes to the UserDoc.
   ///
   /// Returns a Stream of an updated UserModel using [getUserModel(String uid, String poolID)].
-  static Stream<UserModel> updatedUserModel(UserModel user, {String poolID}) {
+  static Stream<UserModel> streamUserModel(UserModel user, {String poolID}) {
     DocumentReference userRef =
         _firestore.collection('users').document(user.uid);
     return userRef.snapshots().map((userDoc) {
@@ -71,6 +72,79 @@ class DataService {
 
       return members;
     });
+  }
+
+  static Stream<List<dynamic>> streamLogEntries(poolID) {
+    DocumentReference poolRef = _firestore.collection('pools').document(poolID);
+
+    Map<String, LogModel> addedOrModified = {};
+    List<String> removed = [];
+
+    poolRef
+        .collection('logs')
+        .snapshots()
+        .forEach((snap) => snap.documentChanges.forEach((change) {
+              DocumentSnapshot doc = change.document;
+
+              switch (change.type) {
+                case DocumentChangeType.added:
+                case DocumentChangeType.modified:
+                  addedOrModified[change.document.documentID] =
+                      LogModel.firebase(
+                          doc.documentID,
+                          doc['uid'],
+                          doc['roadmeter'],
+                          doc['price'],
+                          doc['amount'],
+                          doc['date'],
+                          doc['notes']);
+                  break;
+                case DocumentChangeType.removed:
+                  removed.add(doc.documentID);
+                  break;
+                default:
+              }
+              return [addedOrModified, removed];
+            }));
+  }
+
+// Wrote this function but might not need it at all lol
+/*
+  /// Gets List of possible Pools for a given [UserModel]
+  static Future<Map<String, String>> fetchPoolSelection(UserModel user) async {
+    DocumentSnapshot userDoc =
+        await _firestore.document('users/${user.uid}').get();
+    Map<String, String> pools = {};
+
+    if (!userDoc.exists) {
+      throw "Userdoc with ID ${user.uid} doesn't exist";
+    } else if (userDoc['membership'] == null) {
+      throw "User with ID ${user.uid} has no membership field";
+    } else if (userDoc['membership'].isEmpty) {
+      return pools;
+    }
+
+    userDoc['membership'].forEach((key, value) => pools[key] = value);
+
+    return pools;
+  }
+
+*/
+
+  /// Checks wether Doc of given [poolID] is alright, returns role of [userID] in that pool.
+  static Future<String> checkOutPool(String poolID, String userID) async {
+    DocumentSnapshot poolSnap =
+        await _firestore.document('pools/$poolID').get();
+    if (!poolSnap.exists) throw "Chosen pool $poolID doesn't exist";
+    if ((poolSnap['members'] == null) ||
+        (poolSnap['founder'] == null) ||
+        (poolSnap['created'] == null) ||
+        (poolSnap['name'] == null)) {
+      throw "Pool $poolID is incomplete";
+    }
+    if (poolSnap['members.$userID'] == null)
+      throw "User $userID not member of Pool document with ID $poolID";
+    return poolSnap['members.$userID'];
   }
 
 /*

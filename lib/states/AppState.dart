@@ -4,10 +4,10 @@ import 'package:petrolshare/models/UserModel.dart';
 import 'package:petrolshare/services/data.dart';
 import 'package:petrolshare/states/Pool.dart';
 
-enum PoolState { notstarted, nopools, retrieved, selected }
+enum PoolStatus { notstarted, nopools, retrieved, selected }
 
 class AppState extends ChangeNotifier {
-  PoolState poolState = PoolState.notstarted;
+  PoolStatus poolState = PoolStatus.notstarted;
   String selectedPool;
   Map<String, String> availablePools;
 
@@ -32,22 +32,32 @@ class AppState extends ChangeNotifier {
             : (authUser.email ?? authUser.phoneNumber),
         isAnonymous: authUser.isAnonymous);
 
-    DataService.updatedUserModel(user, pool: selectedPool)
+    DataService.streamUserModel(user, poolID: selectedPool)
         .listen(onUpdatedUserModel);
   }
 
-// TODO: This function will need to decide which change warrants [notifyListeners()]
+  // TODO: This function will need to decide which change warrants [notifyListeners()]
   void onUpdatedUserModel(UserModel updatedUser) async {
     if (_user.uid != updatedUser.uid) {
-      poolState = PoolState.notstarted;
+      poolState = PoolStatus.notstarted;
       selectedPool = null;
       availablePools = updatedUser.membership;
       poolState =
-          availablePools.isEmpty ? PoolState.nopools : PoolState.retrieved;
+          availablePools.isEmpty ? PoolStatus.nopools : PoolStatus.retrieved;
     }
 
     _user = updatedUser;
 
+    notifyListeners();
+  }
+
+  /// Sets the selected Pool to [poolID] if everything checks out.
+  Future<void> setPool(String poolID) async {
+    if (_user.membership[poolID] == null)
+      throw "User ${_user.uid} not member of Pool $poolID";
+    _user.roleString = await DataService.checkOutPool(poolID, _user.uid);
+    selectedPool = poolID;
+    poolState = PoolStatus.selected;
     notifyListeners();
   }
 }

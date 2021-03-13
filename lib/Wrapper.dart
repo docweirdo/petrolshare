@@ -22,8 +22,8 @@ class Wrapper extends StatelessWidget {
       else
         return ChangeNotifierProvider<AppState>(
           create: (context) => AppState(user),
-          child: ChangeNotifierProxyProvider<AppState, Pool>(
-            create: (context) => Pool(),
+          child: ChangeNotifierProxyProvider<AppState, PoolState>(
+            create: (context) => PoolState(),
             update: (_, appState, pool) => pool..update(appState.selectedPool),
             child: MaterialApp(
               title: _title,
