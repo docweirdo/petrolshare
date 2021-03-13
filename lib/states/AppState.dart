@@ -13,6 +13,10 @@ class AppState extends ChangeNotifier {
 
   UserModel _user;
 
+  AppState(FirebaseUser firebaseUser) {
+    update(firebaseUser);
+  }
+
   /// Updates the [AppState] and contained [UserModel] when the Firebase User has changed.
   void update(FirebaseUser authUser) async {
     UserModel user =

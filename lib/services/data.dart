@@ -16,7 +16,7 @@ class DataService {
     DocumentReference userRef =
         _firestore.collection('users').document(user.uid);
     return userRef.snapshots().map((userDoc) {
-      debugPrint("User Document has Changed");
+      debugPrint("User Document Stream fired");
       if (!userDoc.exists) return user;
       return fromUserDoc(user.uid, userDoc, poolID: poolID);
     });
@@ -52,7 +52,25 @@ class DataService {
 
   /// Streams a Map following changes of Membership or Members of Pool with ID [poolID].
   static Stream<Map<String, UserModel>> streamPoolMembers(String poolID) {
-    // TODO: Listen to Poolmembers
+    DocumentReference poolRef = _firestore.collection('pools').document(poolID);
+
+    return poolRef.snapshots().map((poolDoc) {
+      debugPrint("Selected Pool Document Stream fired");
+
+      if (!poolDoc.exists || poolDoc['members'] == null) {
+        throw "Pool $poolID members field doesn't exist";
+      }
+
+      Map<String, UserModel> members = {};
+
+      poolDoc['members'].forEach((uid, properties) {
+        members[uid] = UserModel(
+            uid, properties['name'], properties['photoURL'],
+            role: properties['role']);
+      });
+
+      return members;
+    });
   }
 
 /*

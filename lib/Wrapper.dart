@@ -1,6 +1,5 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:petrolshare/models/UserModel.dart';
 import 'package:petrolshare/routes/home/HomeRoute.dart';
 import 'package:petrolshare/routes/authenticate/AuthenticateRoute.dart';
 import 'package:petrolshare/states/AppState.dart';
@@ -20,10 +19,9 @@ class Wrapper extends StatelessWidget {
     return Consumer<FirebaseUser>(builder: (_, user, child) {
       if (user == null)
         return AuthenticateRoute();
-      else //TODO: ProxyPovider might be replacable by normal Provider using user in Constructor
-        return ProxyProvider<FirebaseUser, AppState>(
-          create: (context) => AppState(),
-          update: (_, firebaseUser, appState) => appState..update(firebaseUser),
+      else
+        return ChangeNotifierProvider<AppState>(
+          create: (context) => AppState(user),
           child: ChangeNotifierProxyProvider<AppState, Pool>(
             create: (context) => Pool(),
             update: (_, appState, pool) => pool..update(appState.selectedPool),
