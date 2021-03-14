@@ -6,7 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:petrolshare/routes/managing/MemberSettings.dart';
 import 'package:petrolshare/services/auth.dart';
-import 'package:petrolshare/states/Pool.dart';
+import 'package:petrolshare/states/PoolState.dart';
 import 'package:petrolshare/widgets/NameAndIcon.dart';
 import 'package:petrolshare/widgets/PoolList.dart';
 import 'package:provider/provider.dart';
@@ -54,7 +54,7 @@ class ManageStrippedTab extends StatelessWidget {
           leading: Icon(Icons.loop),
           title: Text('Switch Pool'),
           onTap: () {
-            PoolState currentState = _pool.poolState;
+            PoolState currentState = _pool.poolStatus;
             Future<Map<String, String>> pools = _pool.fetchPoolSelection();
             pools.then((value) => poolSelection(context, value)).then((value) {
               if (value != null && value != _pool.pool) {
@@ -64,7 +64,7 @@ class ManageStrippedTab extends StatelessWidget {
                       duration: Duration(seconds: 2)));
                 });
               } else {
-                _pool.poolState = currentState;
+                _pool.poolStatus = currentState;
               }
             });
           },

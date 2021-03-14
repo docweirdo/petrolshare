@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:petrolshare/models/UserModel.dart';
-import 'package:petrolshare/states/Pool.dart';
+import 'package:petrolshare/states/PoolState.dart';
 import 'package:provider/provider.dart';
 
 class MemberSettings extends StatelessWidget {

@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:petrolshare/models/UserModel.dart';
 import 'package:petrolshare/routes/authenticate/SignIn.dart';
 import 'package:petrolshare/services/auth.dart';
-import 'package:petrolshare/states/Pool.dart';
+import 'package:petrolshare/states/PoolState.dart';
 import 'package:petrolshare/widgets/CountDownButton.dart';
 import 'package:petrolshare/widgets/ListEditTile.dart';
 import 'package:petrolshare/widgets/TextFieldModalSheet.dart';

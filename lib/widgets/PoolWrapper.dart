@@ -1,19 +1,16 @@
-
-
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:petrolshare/routes/home/tabs/ManageStrippedTab.dart';
 import 'package:petrolshare/routes/home/tabs/NoPoolTab.dart';
 import 'package:petrolshare/states/LogList.dart';
-import 'package:petrolshare/states/Pool.dart';
+import 'package:petrolshare/states/AppState.dart';
 import 'package:petrolshare/widgets/PoolList.dart';
 import 'package:provider/provider.dart';
 import 'package:petrolshare/routes/home/tabs/LogsTab.dart';
 import 'package:petrolshare/routes/home/tabs/StatsTab.dart';
-import 'package:petrolshare/routes/home/tabs/ManageTab.dart'; 
+import 'package:petrolshare/routes/home/tabs/ManageTab.dart';
 
-class PoolWrapper extends StatelessWidget{
-
+class PoolWrapper extends StatelessWidget {
   final int _selectedIndex;
 
   final _widgetOptions = [
@@ -31,39 +28,39 @@ class PoolWrapper extends StatelessWidget{
   PoolWrapper(this._selectedIndex);
 
   @override
-  Widget build(BuildContext context){
-
+  Widget build(BuildContext context) {
     print("built PoolWrapper");
 
     Pool _pool = Provider.of<Pool>(context);
 
-    if (_pool.poolState == PoolState.notstarted){
+    if (_pool.poolStatus == PoolStatus.notstarted) {
       Future<Map<String, String>> pools = _pool.fetchPoolSelection();
-      pools.then((value) => poolSelection(context, value))
-      .then((value) {if (value != null) _pool.setPool(value);});
+      pools.then((value) => poolSelection(context, value)).then((value) {
+        if (value != null) _pool.setPool(value);
+      });
     }
     return _figureOutTab(_pool);
   }
 
-  Widget _figureOutTab(Pool _pool){
-
-    if (_selectedIndex == 2) 
-    return (_pool.poolState == PoolState.selected ? _widgetOptions[_selectedIndex] : _fakeWidgetOptions[_selectedIndex]);
+  Widget _figureOutTab(Pool _pool) {
+    if (_selectedIndex == 2)
+      return (_pool.poolStatus == PoolStatus.selected
+          ? _widgetOptions[_selectedIndex]
+          : _fakeWidgetOptions[_selectedIndex]);
     else {
-
       Widget childWidget;
 
-      switch (_pool.poolState) {
-        case PoolState.notstarted:
+      switch (_pool.poolStatus) {
+        case PoolStatus.notstarted:
           childWidget = _fakeWidgetOptions[0];
           break;
-        case PoolState.nopools:
+        case PoolStatus.nopools:
           childWidget = _fakeWidgetOptions[1];
           break;
-        case PoolState.retrieved:
+        case PoolStatus.retrieved:
           childWidget = _fakeWidgetOptions[1];
           break;
-        case PoolState.selected:
+        case PoolStatus.selected:
           childWidget = _widgetOptions[_selectedIndex];
           break;
       }
@@ -73,27 +70,22 @@ class PoolWrapper extends StatelessWidget{
         child: childWidget,
       );
     }
-
   }
 
-
-  Future<String> poolSelection(BuildContext context, Map<String, String> pools){
-    
+  Future<String> poolSelection(
+      BuildContext context, Map<String, String> pools) {
     if (pools.isEmpty) return null;
 
     if (pools.length == 1) return Future.value(pools.keys.toList()[0]);
-    
+
     return showDialog(
-      context: context,
-      barrierDismissible: false,
-      builder: (BuildContext context){
-        return AlertDialog(
-          title: Text('Choose a pool'),
-          content: PoolList(pools),
-        );
-      }
-    );
+        context: context,
+        barrierDismissible: false,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            title: Text('Choose a pool'),
+            content: PoolList(pools),
+          );
+        });
   }
-
-
 }

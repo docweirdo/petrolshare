@@ -3,10 +3,9 @@ import 'package:cloud_functions/cloud_functions.dart';
 import 'package:flutter/material.dart';
 import 'package:petrolshare/models/LogModel.dart';
 import 'package:petrolshare/models/UserModel.dart';
-import 'package:petrolshare/states/Pool.dart';
 
 class DataService {
-  final CloudFunctions cf = CloudFunctions(region: 'europe-west1');
+  static final CloudFunctions cf = CloudFunctions(region: 'europe-west1');
 
   static Firestore _firestore = Firestore.instance;
 
@@ -80,32 +79,40 @@ class DataService {
     Map<String, LogModel> addedOrModified = {};
     List<String> removed = [];
 
-    poolRef
-        .collection('logs')
-        .snapshots()
-        .forEach((snap) => snap.documentChanges.forEach((change) {
-              DocumentSnapshot doc = change.document;
+    return poolRef.collection('logs').snapshots().map((snap) {
+      snap.documentChanges.forEach((change) {
+        debugPrint("Log Stream fired");
 
-              switch (change.type) {
-                case DocumentChangeType.added:
-                case DocumentChangeType.modified:
-                  addedOrModified[change.document.documentID] =
-                      LogModel.firebase(
-                          doc.documentID,
-                          doc['uid'],
-                          doc['roadmeter'],
-                          doc['price'],
-                          doc['amount'],
-                          doc['date'],
-                          doc['notes']);
-                  break;
-                case DocumentChangeType.removed:
-                  removed.add(doc.documentID);
-                  break;
-                default:
-              }
-              return [addedOrModified, removed];
-            }));
+        DocumentSnapshot doc = change.document;
+
+        switch (change.type) {
+          case DocumentChangeType.added:
+          case DocumentChangeType.modified:
+            addedOrModified[change.document.documentID] = LogModel.firebase(
+                doc.documentID,
+                doc['uid'],
+                doc['roadmeter'],
+                doc['price'],
+                doc['amount'],
+                doc['date'],
+                doc['notes']);
+            break;
+          case DocumentChangeType.removed:
+            removed.add(doc.documentID);
+            break;
+          default:
+        }
+      });
+      return [addedOrModified, removed];
+    });
+  }
+
+  static Future<void> addLog(LogModel log, String poolID) {
+    return _firestore
+        .collection('pools')
+        .document(poolID)
+        .collection('logs')
+        .add(log.toMap());
   }
 
 // Wrote this function but might not need it at all lol
@@ -131,7 +138,7 @@ class DataService {
 
 */
 
-  /// Checks wether Doc of given [poolID] is alright, returns role of [userID] in that pool.
+  /// Checks whether Doc of given [poolID] is alright, returns role of [userID] in that pool.
   static Future<String> checkOutPool(String poolID, String userID) async {
     DocumentSnapshot poolSnap =
         await _firestore.document('pools/$poolID').get();
@@ -147,39 +154,24 @@ class DataService {
     return poolSnap['members.$userID'];
   }
 
-/*
-  Future<String> createPool(String poolname) async {
+  static Future<String> createPool(String poolname) async {
     HttpsCallable callable = cf.getHttpsCallable(functionName: 'createPool');
 
     callable.timeout = const Duration(seconds: 30);
 
-    try {
-      final HttpsCallableResult result = await callable.call(
-        <String, dynamic>{'poolname': poolname},
-      );
-      return result.data['poolID'];
-    } on CloudFunctionsException catch (e) {
-      print('caught firebase functions exception');
-      print(e.code);
-      print(e.message);
-      print(e.details);
-    } catch (e) {
-      print('caught generic exception');
-      print(e);
-    }
-
-    throw Exception('Something went wrong');
+    final HttpsCallableResult result = await callable.call(
+      <String, dynamic>{'poolname': poolname},
+    );
+    return result.data['poolID'];
   }
 
-  Future<void> renamePool(String poolname, Pool pool) {
-    DocumentReference poolRef =
-        _firestore.collection('pools').document(pool.pool);
+  static Future<void> renamePool(String poolID, String poolname) {
+    DocumentReference poolRef = _firestore.collection('pools').document(poolID);
 
-    return poolRef
-        .updateData({'name': poolname})
-        .then((value) => pool.pools[pool.pool] = poolname)
-        .then((value) => pool.notify());
+    return poolRef.updateData({'name': poolname});
   }
+
+  /*
 
   Future<void> deletePool(Pool pool) async {
     HttpsCallable callable = cf.getHttpsCallable(functionName: 'deletePool');

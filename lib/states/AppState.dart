@@ -2,14 +2,14 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:petrolshare/models/UserModel.dart';
 import 'package:petrolshare/services/data.dart';
-import 'package:petrolshare/states/Pool.dart';
 
 enum PoolStatus { notstarted, nopools, retrieved, selected }
 
 class AppState extends ChangeNotifier {
-  PoolStatus poolState = PoolStatus.notstarted;
+  PoolStatus poolStatus = PoolStatus.notstarted;
   String selectedPool;
-  Map<String, String> availablePools;
+  String selectedPoolRole; // Ugly but necessary because of overwriting stream
+  Map<String, String> availablePools = {};
 
   UserModel _user;
 
@@ -17,7 +17,8 @@ class AppState extends ChangeNotifier {
     update(firebaseUser);
   }
 
-  /// Updates the [AppState] and contained [UserModel] when the Firebase User has changed.
+  /// Updates the [AppState] and contained [UserModel] when the
+  /// Firebase User has changed.
   void update(FirebaseUser authUser) async {
     UserModel user =
         await DataService.getUserModel(authUser.uid, poolID: selectedPool);
@@ -39,14 +40,25 @@ class AppState extends ChangeNotifier {
   // TODO: This function will need to decide which change warrants [notifyListeners()]
   void onUpdatedUserModel(UserModel updatedUser) async {
     if (_user.uid != updatedUser.uid) {
-      poolState = PoolStatus.notstarted;
+      poolStatus = PoolStatus.notstarted;
+      selectedPoolRole = null;
       selectedPool = null;
-      availablePools = updatedUser.membership;
-      poolState =
+      poolStatus =
           availablePools.isEmpty ? PoolStatus.nopools : PoolStatus.retrieved;
     }
 
     _user = updatedUser;
+    availablePools = updatedUser.membership;
+
+    if (availablePools[selectedPool] == null &&
+        poolStatus == PoolStatus.selected) {
+      // Pool might have gotten deleted in the meantime?
+      selectedPool = availablePools.entries.first.value;
+    }
+
+    if (poolStatus == PoolStatus.selected) {
+      _user.roleString = selectedPoolRole;
+    }
 
     notifyListeners();
   }
@@ -55,9 +67,22 @@ class AppState extends ChangeNotifier {
   Future<void> setPool(String poolID) async {
     if (_user.membership[poolID] == null)
       throw "User ${_user.uid} not member of Pool $poolID";
-    _user.roleString = await DataService.checkOutPool(poolID, _user.uid);
+    selectedPoolRole = await DataService.checkOutPool(poolID, _user.uid);
+    _user.roleString = selectedPoolRole;
     selectedPool = poolID;
-    poolState = PoolStatus.selected;
+    poolStatus = PoolStatus.selected;
     notifyListeners();
+  }
+
+  /// Creates a new Pool of name [poolname] in the name of
+  /// the current user and returns the new pools ID.
+  Future<String> createPool(String poolname) {
+    if (_user.isAnonymous) throw "User ${_user.uid} is anonymous";
+    if (availablePools.length > 4)
+      throw "User ${_user.uid} owns too many pools";
+    if (poolname.length > 15)
+      throw "Poolname \"$poolname\" longer than 15 chars.";
+
+    return DataService.createPool(poolname);
   }
 }

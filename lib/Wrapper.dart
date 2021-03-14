@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:petrolshare/routes/home/HomeRoute.dart';
 import 'package:petrolshare/routes/authenticate/AuthenticateRoute.dart';
 import 'package:petrolshare/states/AppState.dart';
-import 'package:petrolshare/states/Pool.dart';
+import 'package:petrolshare/states/PoolState.dart';
 import 'package:provider/provider.dart';
 
 class Wrapper extends StatelessWidget {
@@ -24,7 +24,9 @@ class Wrapper extends StatelessWidget {
           create: (context) => AppState(user),
           child: ChangeNotifierProxyProvider<AppState, PoolState>(
             create: (context) => PoolState(),
-            update: (_, appState, pool) => pool..update(appState.selectedPool),
+            update: (_, appState, poolState) => poolState
+              ..update(appState.selectedPool,
+                  appState.availablePools[appState.selectedPool]),
             child: MaterialApp(
               title: _title,
               home: HomeRoute(),

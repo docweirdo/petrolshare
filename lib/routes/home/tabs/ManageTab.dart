@@ -6,7 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:petrolshare/routes/managing/MemberSettings.dart';
 import 'package:petrolshare/services/auth.dart';
-import 'package:petrolshare/states/Pool.dart';
+import 'package:petrolshare/states/PoolState.dart';
 import 'package:petrolshare/widgets/CountDownButton.dart';
 import 'package:petrolshare/widgets/NameAndIcon.dart';
 import 'package:petrolshare/widgets/PoolList.dart';
