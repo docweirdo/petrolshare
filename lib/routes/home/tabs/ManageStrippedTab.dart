@@ -4,8 +4,8 @@ import 'package:petrolshare/models/UserModel.dart';
 import 'package:petrolshare/routes/managing/AccountSettings.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
-import 'package:petrolshare/routes/managing/MemberSettings.dart';
 import 'package:petrolshare/services/auth.dart';
+import 'package:petrolshare/states/AppState.dart';
 import 'package:petrolshare/states/PoolState.dart';
 import 'package:petrolshare/widgets/NameAndIcon.dart';
 import 'package:petrolshare/widgets/PoolList.dart';
@@ -21,8 +21,9 @@ class ManageStrippedTab extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    Pool _pool = Provider.of<Pool>(context);
-    UserModel _user = _pool.user;
+    AppState appState = Provider.of<AppState>(context);
+    PoolState poolState = Provider.of<PoolState>(context);
+    UserModel user = appState.user;
 
     //assert (_user.hashCode == _pool.user.hashCode);
     //Conclusion: Hot Reloading changes Object References. Presumably
@@ -30,7 +31,7 @@ class ManageStrippedTab extends StatelessWidget {
 
     return ListView(children: <Widget>[
       InkWell(
-        child: NameAndIcon(_user, _handleLogout),
+        child: NameAndIcon(user, _handleLogout),
         onTap: () => Navigator.of(context).push(MaterialPageRoute(
             builder: (context) => AccountSettings(_handleLogout))),
       ),
@@ -48,23 +49,19 @@ class ManageStrippedTab extends StatelessWidget {
         padding: EdgeInsets.symmetric(vertical: 10, horizontal: 25),
       ),
       Visibility(
-        visible: _pool.pools.length > 1,
+        visible: appState.availablePools.length > 1,
         child: ListTile(
           contentPadding: EdgeInsets.symmetric(horizontal: 30, vertical: 0),
           leading: Icon(Icons.loop),
           title: Text('Switch Pool'),
           onTap: () {
-            PoolState currentState = _pool.poolStatus;
-            Future<Map<String, String>> pools = _pool.fetchPoolSelection();
-            pools.then((value) => poolSelection(context, value)).then((value) {
-              if (value != null && value != _pool.pool) {
-                _pool.setPool(value).then((value) {
+            poolSelection(context, appState.availablePools).then((value) {
+              if (value != null && value != appState.selectedPool) {
+                appState.setPool(value).then((value) {
                   Scaffold.of(context).showSnackBar(SnackBar(
-                      content: Text('Switched to ${_pool.poolName}'),
+                      content: Text('Switched to ${poolState.name}'),
                       duration: Duration(seconds: 2)));
                 });
-              } else {
-                _pool.poolStatus = currentState;
               }
             });
           },
@@ -74,7 +71,7 @@ class ManageStrippedTab extends StatelessWidget {
         contentPadding: EdgeInsets.symmetric(horizontal: 30, vertical: 0),
         leading: Icon(Icons.add_circle_outline),
         title: Text('Create New Pool'),
-        onTap: () => _handlePoolCreation(context, _pool),
+        onTap: () => _handlePoolCreation(context, appState),
       ),
       //Spacer(), Todo: Find way to pin Feedback to bottom
       Divider(),
@@ -148,11 +145,12 @@ class ManageStrippedTab extends StatelessWidget {
     );
   }
 
-  Future<void> _handlePoolCreation(BuildContext context, Pool pool) async {
+  Future<void> _handlePoolCreation(
+      BuildContext context, AppState appState) async {
     final _formKey = GlobalKey<FormState>();
     String poolname;
 
-    if (pool.user.isAnonymous) {
+    if (appState.user.isAnonymous) {
       Fluttertoast.showToast(
           msg: "Please register an account to create a pool",
           toastLength: Toast.LENGTH_LONG,
@@ -163,7 +161,8 @@ class ManageStrippedTab extends StatelessWidget {
       return;
     }
 
-    if (pool.pools.length > 4) {
+    if (appState.availablePools.length > 4) {
+      // TODO: Shouldn't it be five max to *own*
       Fluttertoast.showToast(
           msg:
               "Limit of 5 Pools reached. Please leave a pool to create a new one.",
@@ -193,7 +192,7 @@ class ManageStrippedTab extends StatelessWidget {
                 title: Text('Create a new pool'),
                 content: Form(
                   key: _formKey,
-                  autovalidate: true,
+                  autovalidateMode: AutovalidateMode.onUserInteraction,
                   child: TextFormField(
                     enableInteractiveSelection: false,
                     autofocus: true,
@@ -235,13 +234,14 @@ class ManageStrippedTab extends StatelessWidget {
 
     if (poolname.length == 0) return;
 
-    String poolID;
+    //String poolID;
 
-    pool.data
-        .createPool(poolname)
+    appState.createPool(poolname);
+    /*
         .then((value) {
           poolID = value;
-          return pool.fetchPoolSelection();
+          //return pool.fetchPoolSelection();
+          appState.poolStatus = PoolStatus.retrieved;
         })
         .then((poolList) => pool.setPool(poolID))
         .then((value) {
@@ -251,6 +251,7 @@ class ManageStrippedTab extends StatelessWidget {
         })
         .catchError((e) => Scaffold.of(context)
             .showSnackBar(SnackBar(content: Text(e.toString()))));
+        */
   }
 
   Future<String> poolSelection(

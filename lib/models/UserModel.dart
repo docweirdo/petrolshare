@@ -6,7 +6,7 @@ enum UserRole { Admin, Member, FormerMember }
 class UserModel {
   String uid;
   String name;
-  Uint8List _photo;
+  Uint8List photoBytes;
   String photoURL;
   UserRole role;
   String identifier;
@@ -64,7 +64,7 @@ class UserModel {
     if (url != null) {
       try {
         photoURL = url;
-        _photo = await http.readBytes(url, headers: {});
+        photoBytes = await http.readBytes(url, headers: {});
       } catch (e) {
         print('Fetch Profile Pic: ' + e.toString());
       }

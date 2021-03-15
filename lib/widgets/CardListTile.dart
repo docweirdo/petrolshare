@@ -144,7 +144,7 @@ class CardListTile extends StatelessWidget {
     UserModel _user =
         Provider.of<LogList>(context, listen: false).members[logModel.uid];
 
-    if (_user.photo == null) {
+    if (_user.photoBytes == null) {
       return CircleAvatar(
           backgroundColor: Colors.grey[100],
           //foregroundColor: Theme.of(context).accentColor,
@@ -156,7 +156,7 @@ class CardListTile extends StatelessWidget {
               )));
     }
     return CircleAvatar(
-      backgroundImage: MemoryImage(_user.photo),
+      backgroundImage: MemoryImage(_user.photoBytes),
       radius: 24,
     );
   }

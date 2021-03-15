@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:petrolshare/models/UserModel.dart';
+import 'package:petrolshare/states/AppState.dart';
 import 'package:petrolshare/states/PoolState.dart';
 import 'package:provider/provider.dart';
 
@@ -8,18 +9,19 @@ class MemberSettings extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    Pool pool = Provider.of<Pool>(context);
+    AppState appState = Provider.of<AppState>(context);
+    PoolState poolState = Provider.of<PoolState>(context);
 
     List<UserModel> userList = [];
 
-    pool.logList.members.forEach((key, value) {
+    poolState.members.forEach((key, value) {
       userList.add(value);
     });
 
     return Scaffold(
       appBar: AppBar(
         title: FittedBox(
-          child: Text('Members of ${pool.poolName}'),
+          child: Text('Members of ${poolState.name}'),
           fit: BoxFit.scaleDown,
         ),
       ),
@@ -44,22 +46,22 @@ class MemberSettings extends StatelessWidget {
                         ),
                         FittedBox(
                           fit: BoxFit.scaleDown,
-                          child: Text(userList[i].role[0].toUpperCase() +
-                              userList[i].role.substring(1)),
+                          child: Text(userList[i].roleString[0].toUpperCase() +
+                              userList[i].roleString.substring(1)),
                         ),
                       ]),
                 ),
                 Container(
                   padding: EdgeInsets.only(right: 10),
                   child: Visibility(
-                    visible: (userList[i].uid != pool.user.uid),
+                    visible: (userList[i].uid != appState.user.uid),
                     child: PopupMenuButton<MemberAction>(
                       child: Icon(Icons.more_vert),
                       onSelected: (value) {
                         if (value == MemberAction.Admin)
-                          _handleAdmin(userList[i], pool);
+                          _handleAdmin(userList[i], poolState);
                         if (value == MemberAction.Delete)
-                          _handleRemoval(userList[i], pool);
+                          _handleRemoval(userList[i], poolState);
                       },
                       itemBuilder: (BuildContext context) =>
                           <PopupMenuEntry<MemberAction>>[
@@ -81,38 +83,35 @@ class MemberSettings extends StatelessWidget {
     );
   }
 
-  Widget _provideAvatar(BuildContext context, UserModel _user) {
-    if (_user.photo == null) {
+  Widget _provideAvatar(BuildContext context, UserModel user) {
+    if (user.photoBytes == null) {
       return CircleAvatar(
           backgroundColor: Colors.grey[100],
           //foregroundColor: Theme.of(context).accentColor,
           radius: 28,
-          child: Text(_user.name[0].toUpperCase(),
+          child: Text(user.name[0].toUpperCase(),
               style: TextStyle(
                 fontSize: 30,
                 fontWeight: FontWeight.bold,
               )));
     }
     return CircleAvatar(
-      backgroundImage: MemoryImage(_user.photo),
+      backgroundImage: MemoryImage(user.photoBytes),
       radius: 28,
     );
   }
 
-  void _handleAdmin(UserModel user, Pool pool) async {
+  void _handleAdmin(UserModel user, PoolState poolState) async {
     try {
-      await pool.data.makeAdmin(user.uid, pool.pool);
+      poolState.makeAdmin(user);
     } catch (e) {
       SnackBar(content: Text('Something went wrong.'));
     }
   }
 
-  void _handleRemoval(UserModel user, Pool pool) async {
+  void _handleRemoval(UserModel user, PoolState poolState) async {
     try {
-      await pool.data.removeUserFromPool(user.uid, pool);
-
-      pool.logList.removePoolMember(user);
-      pool.notify();
+      poolState.removeMember(user.uid);
     } catch (e) {
       SnackBar(content: Text('Something went wrong.'));
     }

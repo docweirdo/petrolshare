@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:petrolshare/models/UserModel.dart';
 import 'package:petrolshare/routes/authenticate/SignIn.dart';
 import 'package:petrolshare/services/auth.dart';
+import 'package:petrolshare/states/AppState.dart';
 import 'package:petrolshare/states/PoolState.dart';
 import 'package:petrolshare/widgets/CountDownButton.dart';
 import 'package:petrolshare/widgets/ListEditTile.dart';
@@ -51,8 +52,8 @@ class _AccountSettingsState extends State<AccountSettings>
 
   @override
   Widget build(BuildContext context) {
-    Pool _pool = Provider.of<Pool>(context);
-    UserModel _user = _pool.user;
+    AppState appState = Provider.of<AppState>(context);
+    UserModel user = appState.user;
 
     WidgetsBinding.instance.addPostFrameCallback((_) => Future.delayed(
         Duration(milliseconds: 400), () => _controller.forward()));
@@ -84,7 +85,7 @@ class _AccountSettingsState extends State<AccountSettings>
                   margin: EdgeInsets.all(30),
                   padding: EdgeInsets.all(30),
                   child: Hero(
-                      child: _provideAvatar(context, _user), tag: "profilepic"),
+                      child: _provideAvatar(context, user), tag: "profilepic"),
                 ),
                 Positioned(
                   child: AnimatedBuilder(
@@ -121,16 +122,16 @@ class _AccountSettingsState extends State<AccountSettings>
           ListEditTile(
               leadingIcon: Icon(Icons.face),
               editCallback: _handleNamechange,
-              title: _user.name,
+              title: user.name,
               info: "Name",
-              args: [_user.name]),
+              args: [user.name]),
           Visibility(
             child: ListEditTile(
                 leadingIcon: Icon(Icons.info_outline),
                 editCallback: _handleIdentifierchange,
-                title: _user.identifier,
+                title: user.identifier,
                 info: "Email/Phone"),
-            visible: !_user.isAnonymous,
+            visible: !user.isAnonymous,
           ),
           Visibility(
             child: ListTile(
@@ -140,7 +141,7 @@ class _AccountSettingsState extends State<AccountSettings>
               onTap: () => Navigator.of(context)
                   .push(MaterialPageRoute(builder: (context) => SignIn())),
             ),
-            visible: _user.isAnonymous,
+            visible: user.isAnonymous,
           ),
           ListTile(
             contentPadding: EdgeInsets.symmetric(horizontal: 30, vertical: 0),
@@ -154,7 +155,7 @@ class _AccountSettingsState extends State<AccountSettings>
   }
 
   Widget _provideAvatar(BuildContext context, UserModel _user) {
-    if (_user.photo == null) {
+    if (_user.photoBytes == null) {
       return CircleAvatar(
           backgroundColor: Colors.grey[100],
           //foregroundColor: Theme.of(context).accentColor,
@@ -166,7 +167,7 @@ class _AccountSettingsState extends State<AccountSettings>
               )));
     }
     return CircleAvatar(
-      backgroundImage: MemoryImage(_user.photo),
+      backgroundImage: MemoryImage(_user.photoBytes),
       radius: 70,
     );
   }

@@ -4,6 +4,8 @@ import 'package:flutter/widgets.dart';
 import 'package:petrolshare/models/LogModel.dart';
 import 'package:petrolshare/models/UserModel.dart';
 import 'package:petrolshare/services/data.dart';
+import 'package:petrolshare/states/AppState.dart';
+
 import 'dart:collection';
 
 enum LogState { notstarted, nologs, retrieved }
@@ -23,6 +25,8 @@ class PoolState extends ChangeNotifier {
   StreamSubscription<Map<String, UserModel>> poolStream;
   StreamSubscription<List<dynamic>> logStream;
 
+  PoolStatus poolStatus = PoolStatus.notstarted;
+
   UnmodifiableListView<LogModel> get logs =>
       UnmodifiableListView(_logs.entries.map((entry) => entry.value)).toList()
         ..sort((a, b) => b.date.compareTo(a.date));
@@ -33,8 +37,13 @@ class PoolState extends ChangeNotifier {
   int get logCount => _logs.length;
 
   /// Updates the ID of the current Pool and listens to changed members
-  void update(String id, name) async {
-    if (this.id == id || this.id == null) return;
+  void update(String id, String name) async {
+    if (this.id == null) return;
+    if (this.id == id) {
+      this.name = name;
+      notifyListeners();
+      return;
+    }
 
     poolStream?.cancel();
     logStream?.cancel();
@@ -106,8 +115,8 @@ class PoolState extends ChangeNotifier {
     await DataService.makeAdmin(user.uid, id);
   }
 
-  Future<void> removeMember(UserModel user) async {
+  Future<void> removeMember(String userID) async {
     // Should trigger Membership Stream, no further action
-    await DataService.removeMemberFromPool(user.uid, id);
+    await DataService.removeMemberFromPool(userID, id);
   }
 }

@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:petrolshare/routes/managing/MemberSettings.dart';
 import 'package:petrolshare/services/auth.dart';
+import 'package:petrolshare/states/AppState.dart';
 import 'package:petrolshare/states/PoolState.dart';
 import 'package:petrolshare/widgets/CountDownButton.dart';
 import 'package:petrolshare/widgets/NameAndIcon.dart';
@@ -22,8 +23,9 @@ class ManageTab extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    Pool _pool = Provider.of<Pool>(context);
-    UserModel _user = _pool.user;
+    AppState appState = Provider.of<AppState>(context);
+    PoolState poolState = Provider.of<PoolState>(context);
+    UserModel user = appState.user;
 
     //assert (_user.hashCode == _pool.user.hashCode);
     //Conclusion: Hot Reloading changes Object References. Presumably
@@ -31,7 +33,7 @@ class ManageTab extends StatelessWidget {
 
     return ListView(children: <Widget>[
       InkWell(
-        child: NameAndIcon(_user, _handleLogout),
+        child: NameAndIcon(user, _handleLogout),
         onTap: () => Navigator.of(context).push(MaterialPageRoute(
             builder: (context) => AccountSettings(_handleLogout))),
       ),
@@ -45,7 +47,7 @@ class ManageTab extends StatelessWidget {
       ),
       Divider(),
       Container(
-        child: Text(_pool.poolName, style: TextStyle(color: Colors.grey)),
+        child: Text(poolState.name, style: TextStyle(color: Colors.grey)),
         padding: EdgeInsets.symmetric(vertical: 10, horizontal: 25),
       ),
       OpenContainer(
@@ -71,23 +73,24 @@ class ManageTab extends StatelessWidget {
                           EdgeInsets.symmetric(horizontal: 30, vertical: 0),
                       leading: Icon(Icons.edit),
                       title: Text('Set Poolname'),
-                      onTap: () => _handlePoolRenaming(context, _pool),
+                      onTap: () => _handlePoolRenaming(context, poolState),
                     ),
-                    visible: _user.role == 'admin' ?? false,
+                    visible: user.role == UserRole.Admin ?? false,
                   ),
                   ListTile(
                     contentPadding:
                         EdgeInsets.symmetric(horizontal: 30, vertical: 0),
                     leading: Icon(Icons.clear),
                     title: Text('Leave Pool'),
-                    onTap: () => _handleLeavePool(context, _user.uid, _pool),
+                    onTap: () => _handleLeavePool(context, user.uid, poolState),
                   ),
                   ListTile(
                     contentPadding:
                         EdgeInsets.symmetric(horizontal: 30, vertical: 0),
                     leading: Icon(Icons.delete),
                     title: Text('Delete Pool'),
-                    onTap: () => _handlePoolDeletion(context, _pool),
+                    onTap: () =>
+                        _handlePoolDeletion(context, poolState, appState),
                   ),
                   Divider(),
                   Container(
@@ -95,28 +98,22 @@ class ManageTab extends StatelessWidget {
                     padding: EdgeInsets.symmetric(vertical: 10, horizontal: 25),
                   ),
                   Visibility(
-                    visible: _pool.pools.length > 1,
+                    visible: appState.availablePools.length > 1,
                     child: ListTile(
                       contentPadding:
                           EdgeInsets.symmetric(horizontal: 30, vertical: 0),
                       leading: Icon(Icons.loop),
                       title: Text('Switch Pool'),
                       onTap: () {
-                        PoolState currentState = _pool.poolState;
-                        Future<Map<String, String>> pools =
-                            _pool.fetchPoolSelection();
-                        pools
-                            .then((value) => poolSelection(context, value))
+                        poolSelection(context, appState.availablePools)
                             .then((value) {
-                          if (value != null && value != _pool.pool) {
-                            _pool.setPool(value).then((value) {
+                          if (value != null && value != appState.selectedPool) {
+                            appState.setPool(value).then((value) {
                               Scaffold.of(context).showSnackBar(SnackBar(
                                   content:
-                                      Text('Switched to ${_pool.poolName}'),
+                                      Text('Switched to ${poolState.name}'),
                                   duration: Duration(seconds: 2)));
                             });
-                          } else {
-                            _pool.poolState = currentState;
                           }
                         });
                       },
@@ -127,7 +124,7 @@ class ManageTab extends StatelessWidget {
                         EdgeInsets.symmetric(horizontal: 30, vertical: 0),
                     leading: Icon(Icons.add_circle_outline),
                     title: Text('Create New Pool'),
-                    onTap: () => _handlePoolCreation(context, _pool),
+                    onTap: () => _handlePoolCreation(context, appState),
                   ),
                   Divider(),
                   ListTile(
@@ -205,7 +202,8 @@ class ManageTab extends StatelessWidget {
     );
   }
 
-  Future<void> _handlePoolRenaming(BuildContext context, Pool pool) async {
+  Future<void> _handlePoolRenaming(
+      BuildContext context, PoolState poolState) async {
     final _formKey = GlobalKey<FormState>();
     String poolname;
 
@@ -227,7 +225,8 @@ class ManageTab extends StatelessWidget {
                 title: Text('Rename Pool'),
                 content: Form(
                   key: _formKey,
-                  autovalidate: true,
+                  autovalidateMode: AutovalidateMode
+                      .onUserInteraction, // TODO: Does this work?
                   child: TextFormField(
                     enableInteractiveSelection: false,
                     autofocus: true,
@@ -238,7 +237,7 @@ class ManageTab extends StatelessWidget {
                       labelText: 'Poolname',
                       counterText: "",
                     ),
-                    initialValue: pool.poolName,
+                    initialValue: poolState.name,
                     onSaved: (newValue) => poolname = newValue,
                     validator: (value) {
                       if (value.isEmpty) return 'Required';
@@ -269,21 +268,22 @@ class ManageTab extends StatelessWidget {
 
     poolname = poolname.trim();
 
-    if (poolname == pool.poolName) return;
+    if (poolname == poolState.name) return;
 
-    pool.data
-        .renamePool(poolname, pool)
+    poolState
+        .renamePool(poolname)
         .then((value) => Scaffold.of(context)
             .showSnackBar(SnackBar(content: Text('Renamed pool to $poolname'))))
         .catchError((error) => Scaffold.of(context)
             .showSnackBar(SnackBar(content: Text(error.toString()))));
   }
 
-  Future<void> _handlePoolCreation(BuildContext context, Pool pool) async {
+  Future<void> _handlePoolCreation(
+      BuildContext context, AppState appState) async {
     final _formKey = GlobalKey<FormState>();
     String poolname;
 
-    if (pool.user.isAnonymous) {
+    if (appState.user.isAnonymous) {
       Fluttertoast.showToast(
           msg: "Please register an account to create a pool",
           toastLength: Toast.LENGTH_LONG,
@@ -294,7 +294,8 @@ class ManageTab extends StatelessWidget {
       return;
     }
 
-    if (pool.pools.length > 4) {
+    if (appState.availablePools.length > 4) {
+      // TODO: Shouldn't it be five max to *own*
       Fluttertoast.showToast(
           msg:
               "Limit of 5 Pools reached. Please leave a pool to create a new one.",
@@ -324,7 +325,7 @@ class ManageTab extends StatelessWidget {
                 title: Text('Create a new pool'),
                 content: Form(
                   key: _formKey,
-                  autovalidate: true,
+                  autovalidateMode: AutovalidateMode.onUserInteraction,
                   child: TextFormField(
                     enableInteractiveSelection: false,
                     autofocus: true,
@@ -366,13 +367,14 @@ class ManageTab extends StatelessWidget {
 
     if (poolname.length == 0) return;
 
-    String poolID;
+    //String poolID;
 
-    pool.data
-        .createPool(poolname)
+    appState.createPool(poolname);
+    /*
         .then((value) {
           poolID = value;
-          return pool.fetchPoolSelection();
+          //return pool.fetchPoolSelection();
+          appState.poolStatus = PoolStatus.retrieved;
         })
         .then((poolList) => pool.setPool(poolID))
         .then((value) {
@@ -382,12 +384,14 @@ class ManageTab extends StatelessWidget {
         })
         .catchError((e) => Scaffold.of(context)
             .showSnackBar(SnackBar(content: Text(e.toString()))));
+        */
   }
 
-  Future<void> _handlePoolDeletion(BuildContext context, Pool pool) async {
+  Future<void> _handlePoolDeletion(
+      BuildContext context, PoolState poolState, AppState appState) async {
     int memberCount = 0;
 
-    pool.logList.members.forEach((key, value) {
+    poolState.members.forEach((key, value) {
       if (['member', 'admin'].contains(value.role)) memberCount++;
     });
 
@@ -411,7 +415,7 @@ class ManageTab extends StatelessWidget {
           actionsPadding: EdgeInsets.symmetric(horizontal: 10, vertical: 5),
           title: Text("Delete Pool"),
           content: Text(
-              "Are you sure you want to delete pool \"${pool.poolName}\"? All data will be lost."),
+              "Are you sure you want to delete pool \"${poolState.name}\"? All data will be lost."),
           actions: <Widget>[
             FlatButton(
               child: Text("Cancel", style: TextStyle(fontSize: 15)),
@@ -434,8 +438,11 @@ class ManageTab extends StatelessWidget {
 
     if (result == true) {
       try {
-        await pool.data.deletePool(pool);
+        await appState.deletePool(poolState.id);
 
+        // TODO: Still needed? Poolwrapper should trigger selection widget
+        // because of AppState change
+        /*
         if (pool.pools.length > 0) {
           //TODO: warum nicht == 1? Genauso in _handleLeavePool
           pool.setPool(pool.pools.keys.first).then((value) {
@@ -456,6 +463,8 @@ class ManageTab extends StatelessWidget {
             pool.notify();
           }
         }
+        */
+
       } catch (e) {
         print(e);
         Scaffold.of(context)
@@ -481,7 +490,8 @@ class ManageTab extends StatelessWidget {
         });
   }
 
-  void _handleLeavePool(BuildContext context, String uid, Pool pool) async {
+  void _handleLeavePool(
+      BuildContext context, String uid, PoolState poolState) async {
     bool result = await showDialog(
       context: context,
       builder: (BuildContext context) {
@@ -490,8 +500,8 @@ class ManageTab extends StatelessWidget {
           contentPadding: EdgeInsets.symmetric(horizontal: 20, vertical: 5),
           actionsPadding: EdgeInsets.symmetric(horizontal: 10, vertical: 5),
           title: Text("Leave Pool"),
-          content:
-              Text("Are you sure you want to leave pool \"${pool.poolName}\"?"),
+          content: Text(
+              "Are you sure you want to leave pool \"${poolState.name}\"?"),
           actions: <Widget>[
             FlatButton(
               child: Text("Cancel", style: TextStyle(fontSize: 15)),
@@ -514,8 +524,9 @@ class ManageTab extends StatelessWidget {
 
     if (result == true) {
       try {
-        await pool.data.removeUserFromPool(uid, pool);
+        await poolState.removeMember(uid);
 
+        /*
         pool.pools.remove(pool.pool);
 
         pool.pool = null;
@@ -540,7 +551,7 @@ class ManageTab extends StatelessWidget {
           } else {
             pool.notify();
           }
-        }
+        } */
       } catch (e) {
         print(e);
         Scaffold.of(context)

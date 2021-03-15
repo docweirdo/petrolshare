@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:petrolshare/models/LogModel.dart';
 import 'package:petrolshare/models/UserModel.dart';
+import 'package:petrolshare/states/AppState.dart';
 import 'package:petrolshare/widgets/open_container_push_future.dart';
 import 'package:flutter/material.dart';
 import 'package:petrolshare/routes/home/NewEntryRoute.dart';
@@ -22,10 +23,11 @@ class _HomeRouteState extends State<HomeRoute> with RouteAware {
   int _selectedIndex = 0;
   bool scrolling = false;
   bool _fabVisible = true;
-  Pool _pool;
+  PoolState poolState;
 
   final _fabKey = GlobalKey<SpiffyButtonState>();
-  UserModel _user;
+  AppState appState;
+  UserModel user;
 
   @override
   void initState() {
@@ -36,7 +38,8 @@ class _HomeRouteState extends State<HomeRoute> with RouteAware {
   void animate() async {
     final pause = const Duration(milliseconds: 100);
 
-    if (_pool != null && _pool.poolStatus == PoolState.selected) {
+    if (appState.poolStatus == PoolStatus.selected) {
+      // TODO: Find better way to position PoolStatus than in AppState
       await Future.delayed(pause);
       _fabKey.currentState.pose = SpiffyButtonPose.shownIconAndLabel;
     }
@@ -54,8 +57,8 @@ class _HomeRouteState extends State<HomeRoute> with RouteAware {
 
   @override
   Widget build(BuildContext context) {
-    _pool = Provider.of<Pool>(context);
-    _user = _pool.user;
+    poolState = Provider.of<PoolState>(context);
+    user = appState.user;
 
     print("built homeRoute");
 
@@ -65,7 +68,7 @@ class _HomeRouteState extends State<HomeRoute> with RouteAware {
           title: FittedBox(
             child: Text(_selectedIndex == 2
                 ? 'Petrolshare'
-                : (_pool?.poolName ?? 'Petrolshare')),
+                : (poolState.name ?? 'Petrolshare')),
             fit: BoxFit.scaleDown,
           ),
           centerTitle: true,
@@ -93,15 +96,15 @@ class _HomeRouteState extends State<HomeRoute> with RouteAware {
           items: const <BottomNavigationBarItem>[
             BottomNavigationBarItem(
               icon: Icon(Icons.book),
-              title: Text('Logs'),
+              label: 'Logs',
             ),
             BottomNavigationBarItem(
               icon: Icon(Icons.trending_up),
-              title: Text('Stats'),
+              label: 'Stats',
             ),
             BottomNavigationBarItem(
               icon: Icon(Icons.supervised_user_circle),
-              title: Text('Manage'),
+              label: 'Manage',
             ),
           ],
           currentIndex: _selectedIndex,
@@ -127,21 +130,22 @@ class _HomeRouteState extends State<HomeRoute> with RouteAware {
                     onTouchDown: () async {
                       dynamic result = await openContainer();
                       if (result != null) {
-                        _pool.logList.add(LogModel(
+                        poolState.addLog(LogModel(
                             ValueKey(result['roadmeter']).toString(),
-                            _user.uid,
+                            user.uid,
                             result['roadmeter'],
                             result['price'],
                             result['amount'],
                             result['date'],
-                            _user.name,
+                            user.name,
                             result['notes']));
                         Scaffold.of(context).showSnackBar(
                             SnackBar(content: Text('Entry added')));
                       }
                     });
               }),
-          visible: (_fabVisible && (_pool.poolStatus == PoolState.selected)),
+          visible:
+              (_fabVisible && (appState.poolStatus == PoolStatus.selected)),
         ));
   }
 }
