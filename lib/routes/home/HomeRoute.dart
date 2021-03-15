@@ -57,6 +57,7 @@ class _HomeRouteState extends State<HomeRoute> with RouteAware {
 
   @override
   Widget build(BuildContext context) {
+    appState = Provider.of<AppState>(context);
     poolState = Provider.of<PoolState>(context);
     user = appState.user;
 

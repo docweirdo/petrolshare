@@ -16,7 +16,7 @@ class Wrapper extends StatelessWidget {
 
     print("built wrapper");
 
-    return Consumer<FirebaseUser>(builder: (_, user, child) {
+    return Consumer<User>(builder: (_, user, child) {
       if (user == null)
         return AuthenticateRoute();
       else

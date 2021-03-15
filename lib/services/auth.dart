@@ -8,17 +8,17 @@ class AuthSevice {
   static final GoogleSignIn _googleSignIn = GoogleSignIn();
 
   // auth change user stream
-  Stream<FirebaseUser> get user {
+  Stream<User> get user {
     debugPrint("AuthService, user state changed");
-    return _auth.onAuthStateChanged;
+    return _auth.authStateChanges();
   }
 
   // sign in anonymously
-  Future<FirebaseUser> signInAnon() async {
+  Future<User> signInAnon() async {
     /*
     try {
       AuthResult result = await _auth.signInAnonymously();
-      FirebaseUser user = result.user;
+      User user = result.user;
       updateUserData(user);
       return user;
     } catch (e) {
@@ -41,21 +41,21 @@ class AuthSevice {
   // sign in with email & password
 
   // sign in silently with Google
-  Future<FirebaseUser> signInSilentlyGoogle() async {
+  Future<User> signInSilentlyGoogle() async {
     GoogleSignInAccount googleUser;
-    FirebaseUser user;
+    User user;
 
     try {
       googleUser = await _googleSignIn.signInSilently();
       if (googleUser == null) throw 'SignIn Silently failed';
       GoogleSignInAuthentication googleAuth = await googleUser.authentication;
-      AuthCredential credential = GoogleAuthProvider.getCredential(
+      AuthCredential credential = GoogleAuthProvider.credential(
         accessToken: googleAuth.accessToken,
         idToken: googleAuth.idToken,
       );
       user = await _auth
           .signInWithCredential(credential)
-          .then((AuthResult result) => result.user);
+          .then((UserCredential result) => result.user);
     } catch (e) {
       debugPrint("AuthService, Silent Google Sign in failed: " + e.toString());
     }
@@ -67,16 +67,16 @@ class AuthSevice {
   }
 
   // sign in with Google
-  Future<FirebaseUser> signInGoogle() async {
+  Future<User> signInGoogle() async {
     GoogleSignInAccount googleUser = await _googleSignIn.signIn();
     GoogleSignInAuthentication googleAuth = await googleUser.authentication;
-    AuthCredential credential = GoogleAuthProvider.getCredential(
+    AuthCredential credential = GoogleAuthProvider.credential(
       accessToken: googleAuth.accessToken,
       idToken: googleAuth.idToken,
     );
-    FirebaseUser user = await _auth
+    User user = await _auth
         .signInWithCredential(credential)
-        .then((AuthResult result) => result.user);
+        .then((UserCredential result) => result.user);
     if (user == null) {
       return null;
     }
@@ -88,7 +88,7 @@ class AuthSevice {
   // sign out
   Future signOut() async {
     bool googleUser = await _googleSignIn.isSignedIn();
-    FirebaseUser user = await _auth.currentUser();
+    User user = _auth.currentUser;
 
     try {
       if (googleUser) {
@@ -106,26 +106,22 @@ class AuthSevice {
   }
 
   Future<void> changeUsername(String username) async {
-    FirebaseUser user = await _auth.currentUser();
-
-    UserUpdateInfo updateInfo = UserUpdateInfo();
-
-    updateInfo.displayName = username;
+    User user = _auth.currentUser;
 
     try {
-      await user.updateProfile(updateInfo);
+      await user.updateProfile(displayName: username);
     } catch (e) {
       return Future.error(e);
     }
 
     DocumentReference userRef =
-        Firestore.instance.collection('users').document(user.uid);
+        FirebaseFirestore.instance.collection('users').doc(user.uid);
 
-    return userRef.updateData({"name": username});
+    return userRef.update({"name": username});
   }
 
   Future<void> deleteAccount() async {
-    FirebaseUser user = await _auth.currentUser();
+    User user = _auth.currentUser;
 
     bool googleUser = await _googleSignIn.isSignedIn();
 

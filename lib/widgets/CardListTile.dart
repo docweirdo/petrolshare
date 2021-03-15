@@ -3,7 +3,7 @@ import 'package:petrolshare/models/LogModel.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:petrolshare/models/UserModel.dart';
-import 'package:petrolshare/states/LogList.dart';
+import 'package:petrolshare/states/PoolState.dart';
 import 'package:provider/provider.dart';
 
 class CardListTile extends StatelessWidget {
@@ -141,10 +141,10 @@ class CardListTile extends StatelessWidget {
   }
 
   Widget _provideAvatar(BuildContext context, LogModel logModel) {
-    UserModel _user =
-        Provider.of<LogList>(context, listen: false).members[logModel.uid];
+    UserModel user =
+        Provider.of<PoolState>(context, listen: false).members[logModel.uid];
 
-    if (_user.photoBytes == null) {
+    if (user.photoBytes == null) {
       return CircleAvatar(
           backgroundColor: Colors.grey[100],
           //foregroundColor: Theme.of(context).accentColor,
@@ -156,7 +156,7 @@ class CardListTile extends StatelessWidget {
               )));
     }
     return CircleAvatar(
-      backgroundImage: MemoryImage(_user.photoBytes),
+      backgroundImage: MemoryImage(user.photoBytes),
       radius: 24,
     );
   }

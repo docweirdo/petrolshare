@@ -13,13 +13,13 @@ class AppState extends ChangeNotifier {
 
   UserModel user;
 
-  AppState(FirebaseUser firebaseUser) {
-    update(firebaseUser);
+  AppState(User user) {
+    update(user);
   }
 
   /// Updates the [AppState] and contained [UserModel] when the
   /// Firebase User has changed.
-  void update(FirebaseUser authUser) async {
+  void update(User authUser) async {
     UserModel user =
         await DataService.getUserModel(authUser.uid, poolID: selectedPool);
 
@@ -27,7 +27,7 @@ class AppState extends ChangeNotifier {
     user ??= UserModel(
         authUser.uid,
         authUser.isAnonymous ? 'Anonymous' : authUser.displayName,
-        authUser.photoUrl,
+        authUser.photoURL,
         identifier: authUser.isAnonymous
             ? null
             : (authUser.email ?? authUser.phoneNumber),

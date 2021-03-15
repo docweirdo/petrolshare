@@ -5,16 +5,16 @@ import 'package:petrolshare/models/LogModel.dart';
 import 'package:petrolshare/models/UserModel.dart';
 
 class DataService {
-  static final CloudFunctions cf = CloudFunctions(region: 'europe-west1');
+  static final FirebaseFunctions cf =
+      FirebaseFunctions.instanceFor(region: 'europe-west1');
 
-  static Firestore _firestore = Firestore.instance;
+  static FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
   /// Takes a [UserModel] and a [Pool] and listens to changes to the UserDoc.
   ///
   /// Returns a Stream of an updated UserModel using [getUserModel(String uid, String poolID)].
   static Stream<UserModel> streamUserModel(UserModel user, {String poolID}) {
-    DocumentReference userRef =
-        _firestore.collection('users').document(user.uid);
+    DocumentReference userRef = _firestore.collection('users').doc(user.uid);
     return userRef.snapshots().map((userDoc) {
       debugPrint("User Document Stream fired");
       if (!userDoc.exists) return user;
@@ -24,7 +24,7 @@ class DataService {
 
   /// Retrieves the UserModel corresponding to an [UID].
   static Future<UserModel> getUserModel(String uid, {String poolID}) async {
-    DocumentSnapshot userDoc = await _firestore.document('users/$uid').get();
+    DocumentSnapshot userDoc = await _firestore.doc('users/$uid').get();
 
     if (!userDoc.exists) return null;
 
@@ -52,7 +52,7 @@ class DataService {
 
   /// Streams a Map following changes of Membership or Members of Pool with ID [poolID].
   static Stream<Map<String, UserModel>> streamPoolMembers(String poolID) {
-    DocumentReference poolRef = _firestore.collection('pools').document(poolID);
+    DocumentReference poolRef = _firestore.collection('pools').doc(poolID);
 
     return poolRef.snapshots().map((poolDoc) {
       debugPrint("Selected Pool Document Stream fired");
@@ -74,22 +74,22 @@ class DataService {
   }
 
   static Stream<List<dynamic>> streamLogEntries(poolID) {
-    DocumentReference poolRef = _firestore.collection('pools').document(poolID);
+    DocumentReference poolRef = _firestore.collection('pools').doc(poolID);
 
     Map<String, LogModel> addedOrModified = {};
     List<String> removed = [];
 
     return poolRef.collection('logs').snapshots().map((snap) {
-      snap.documentChanges.forEach((change) {
+      snap.docChanges.forEach((change) {
         debugPrint("Log Stream fired");
 
-        DocumentSnapshot doc = change.document;
+        DocumentSnapshot doc = change.doc;
 
         switch (change.type) {
           case DocumentChangeType.added:
           case DocumentChangeType.modified:
-            addedOrModified[change.document.documentID] = LogModel.firebase(
-                doc.documentID,
+            addedOrModified[change.doc.id] = LogModel.firebase(
+                doc.id,
                 doc['uid'],
                 doc['roadmeter'],
                 doc['price'],
@@ -98,7 +98,7 @@ class DataService {
                 doc['notes']);
             break;
           case DocumentChangeType.removed:
-            removed.add(doc.documentID);
+            removed.add(doc.id);
             break;
           default:
         }
@@ -110,7 +110,7 @@ class DataService {
   static Future<void> addLog(LogModel log, String poolID) {
     return _firestore
         .collection('pools')
-        .document(poolID)
+        .doc(poolID)
         .collection('logs')
         .add(log.toMap());
   }
@@ -120,7 +120,7 @@ class DataService {
   /// Gets List of possible Pools for a given [UserModel]
   static Future<Map<String, String>> fetchPoolSelection(UserModel user) async {
     DocumentSnapshot userDoc =
-        await _firestore.document('users/${user.uid}').get();
+        await _firestore.doc('users/${user.uid}').get();
     Map<String, String> pools = {};
 
     if (!userDoc.exists) {
@@ -140,8 +140,7 @@ class DataService {
 
   /// Checks whether Doc of given [poolID] is alright, returns role of [userID] in that pool.
   static Future<String> checkOutPool(String poolID, String userID) async {
-    DocumentSnapshot poolSnap =
-        await _firestore.document('pools/$poolID').get();
+    DocumentSnapshot poolSnap = await _firestore.doc('pools/$poolID').get();
     if (!poolSnap.exists) throw "Chosen pool $poolID doesn't exist";
     if ((poolSnap['members'] == null) ||
         (poolSnap['founder'] == null) ||
@@ -155,9 +154,7 @@ class DataService {
   }
 
   static Future<String> createPool(String poolname) async {
-    HttpsCallable callable = cf.getHttpsCallable(functionName: 'createPool');
-
-    callable.timeout = const Duration(seconds: 30);
+    HttpsCallable callable = cf.httpsCallable('createPool');
 
     final HttpsCallableResult result = await callable.call(
       <String, dynamic>{'poolname': poolname},
@@ -166,15 +163,13 @@ class DataService {
   }
 
   static Future<void> renamePool(String poolID, String poolname) {
-    DocumentReference poolRef = _firestore.collection('pools').document(poolID);
+    DocumentReference poolRef = _firestore.collection('pools').doc(poolID);
 
-    return poolRef.updateData({'name': poolname});
+    return poolRef.update({'name': poolname});
   }
 
   static Future<void> deletePool(String poolID) async {
-    HttpsCallable callable = cf.getHttpsCallable(functionName: 'deletePool');
-
-    callable.timeout = const Duration(seconds: 30);
+    HttpsCallable callable = cf.httpsCallable('deletePool');
 
     await callable.call(
       <String, dynamic>{'poolID': poolID},
@@ -182,9 +177,7 @@ class DataService {
   }
 
   static Future<void> makeAdmin(String uid, String poolID) async {
-    HttpsCallable callable = cf.getHttpsCallable(functionName: 'makeAdmin');
-
-    callable.timeout = const Duration(seconds: 30);
+    HttpsCallable callable = cf.httpsCallable('makeAdmin');
 
     await callable.call(
       <String, dynamic>{'poolID': poolID, 'uid': uid},
@@ -192,10 +185,7 @@ class DataService {
   }
 
   static Future<void> removeMemberFromPool(String uid, String poolID) async {
-    HttpsCallable callable =
-        cf.getHttpsCallable(functionName: 'removeUserFromPool');
-
-    callable.timeout = const Duration(seconds: 30);
+    HttpsCallable callable = cf.httpsCallable('removeUserFromPool');
 
     await callable.call(
       <String, dynamic>{'poolID': poolID, 'uid': uid},

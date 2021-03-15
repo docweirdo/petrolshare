@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:petrolshare/routes/home/tabs/ManageStrippedTab.dart';
 import 'package:petrolshare/routes/home/tabs/NoPoolTab.dart';
-import 'package:petrolshare/states/LogList.dart';
 import 'package:petrolshare/states/AppState.dart';
 import 'package:petrolshare/widgets/PoolList.dart';
 import 'package:provider/provider.dart';
