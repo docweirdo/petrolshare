@@ -181,7 +181,7 @@ class DataService {
     );
   }
 
-  Future<void> makeAdmin(String uid, String poolID) async {
+  static Future<void> makeAdmin(String uid, String poolID) async {
     HttpsCallable callable = cf.getHttpsCallable(functionName: 'makeAdmin');
 
     callable.timeout = const Duration(seconds: 30);
@@ -191,31 +191,14 @@ class DataService {
     );
   }
 
-  /*
-
-  Future<void> removeUserFromPool(String uid, Pool pool) async {
+  static Future<void> removeMemberFromPool(String uid, String poolID) async {
     HttpsCallable callable =
         cf.getHttpsCallable(functionName: 'removeUserFromPool');
 
     callable.timeout = const Duration(seconds: 30);
 
-    try {
-      final HttpsCallableResult result = await callable.call(
-        <String, dynamic>{'poolID': pool.pool, 'uid': uid},
-      );
-
-      return;
-    } on CloudFunctionsException catch (e) {
-      print('caught firebase functions exception');
-      print(e.code);
-      print(e.message);
-      print(e.details);
-    } catch (e) {
-      print('caught generic exception');
-      print(e);
-    }
-
-    throw Exception('Something went wrong');
+    await callable.call(
+      <String, dynamic>{'poolID': poolID, 'uid': uid},
+    );
   }
-  */
 }

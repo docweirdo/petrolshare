@@ -105,4 +105,9 @@ class PoolState extends ChangeNotifier {
     // TODO: Check for anonymity, possibly add field to membership map in DB
     await DataService.makeAdmin(user.uid, id);
   }
+
+  Future<void> removeMember(UserModel user) async {
+    // Should trigger Membership Stream, no further action
+    await DataService.removeMemberFromPool(user.uid, id);
+  }
 }
