@@ -85,4 +85,9 @@ class AppState extends ChangeNotifier {
 
     return DataService.createPool(poolname);
   }
+
+  Future<void> deletePool(String poolID) async {
+    // Presumably triggers UserDoc Stream, no further action?
+    await DataService.deletePool(poolID);
+  }
 }

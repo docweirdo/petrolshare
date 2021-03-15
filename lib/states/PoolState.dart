@@ -94,10 +94,15 @@ class PoolState extends ChangeNotifier {
     if (newPoolname.length > 15)
       throw "Poolname \"$newPoolname\" longer than 15 chars.";
 
-    // Don't have to rename Membership List of AppState here
-    // because userListener in AppState is triggered
+    // Presumably triggers UserDoc Stream in AppState, so no further
+    // action like updating Membership list and available pools?
     name = newPoolname;
     await DataService.renamePool(id, newPoolname);
     notifyListeners();
+  }
+
+  Future<void> makeAdmin(UserModel user) async {
+    // TODO: Check for anonymity, possibly add field to membership map in DB
+    await DataService.makeAdmin(user.uid, id);
   }
 }

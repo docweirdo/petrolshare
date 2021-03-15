@@ -171,36 +171,14 @@ class DataService {
     return poolRef.updateData({'name': poolname});
   }
 
-  /*
-
-  Future<void> deletePool(Pool pool) async {
+  static Future<void> deletePool(String poolID) async {
     HttpsCallable callable = cf.getHttpsCallable(functionName: 'deletePool');
 
     callable.timeout = const Duration(seconds: 30);
 
-    try {
-      final HttpsCallableResult result = await callable.call(
-        <String, dynamic>{'poolID': pool.pool},
-      );
-
-      pool.pools.remove(pool.pool);
-
-      pool.pool = null;
-
-      pool.poolState = PoolState.retrieved;
-
-      return null;
-    } on CloudFunctionsException catch (e) {
-      print('caught firebase functions exception');
-      print(e.code);
-      print(e.message);
-      print(e.details);
-    } catch (e) {
-      print('caught generic exception');
-      print(e);
-    }
-
-    throw Exception('Something went wrong');
+    await callable.call(
+      <String, dynamic>{'poolID': poolID},
+    );
   }
 
   Future<void> makeAdmin(String uid, String poolID) async {
@@ -208,23 +186,12 @@ class DataService {
 
     callable.timeout = const Duration(seconds: 30);
 
-    try {
-      final HttpsCallableResult result = await callable.call(
-        <String, dynamic>{'poolID': poolID, 'uid': uid},
-      );
-      return;
-    } on CloudFunctionsException catch (e) {
-      print('caught firebase functions exception');
-      print(e.code);
-      print(e.message);
-      print(e.details);
-    } catch (e) {
-      print('caught generic exception');
-      print(e);
-    }
-
-    throw Exception('Something went wrong');
+    await callable.call(
+      <String, dynamic>{'poolID': poolID, 'uid': uid},
+    );
   }
+
+  /*
 
   Future<void> removeUserFromPool(String uid, Pool pool) async {
     HttpsCallable callable =
