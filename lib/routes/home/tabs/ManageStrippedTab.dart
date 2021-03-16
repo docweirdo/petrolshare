@@ -84,7 +84,7 @@ class ManageStrippedTab extends StatelessWidget {
       Row(mainAxisAlignment: MainAxisAlignment.spaceEvenly, children: <Widget>[
         Expanded(
           child: InkWell(
-            onTap: () => _launchURL("http://www.docweirdo.de"),
+            onTap: () => _launchURL("http://www.docweirdo.de/privacy"),
             child: Align(
               alignment: Alignment.center,
               child: Padding(
@@ -97,7 +97,7 @@ class ManageStrippedTab extends StatelessWidget {
         ),
         Expanded(
           child: InkWell(
-            onTap: () => _launchURL("http://www.docweirdo.de"),
+            onTap: () => _launchURL("http://www.docweirdo.de/tos"),
             child: Align(
               alignment: Alignment.center,
               child: Padding(

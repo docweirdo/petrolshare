@@ -20,6 +20,7 @@ class AppState extends ChangeNotifier {
   /// Updates the [AppState] and contained [UserModel] when the
   /// Firebase User has changed.
   void update(User authUser) async {
+    //print(authUser);
     UserModel user =
         await DataService.getUserModel(authUser.uid, poolID: selectedPool);
 
@@ -31,7 +32,12 @@ class AppState extends ChangeNotifier {
         identifier: authUser.isAnonymous
             ? null
             : (authUser.email ?? authUser.phoneNumber),
-        isAnonymous: authUser.isAnonymous);
+        isAnonymous: authUser.isAnonymous,
+        membership: {});
+
+    availablePools = user.membership;
+    poolStatus =
+        availablePools.isEmpty ? PoolStatus.nopools : PoolStatus.retrieved;
 
     DataService.streamUserModel(user, poolID: selectedPool)
         .listen(onUpdatedUserModel);
@@ -39,16 +45,15 @@ class AppState extends ChangeNotifier {
 
   // TODO: This function will need to decide which change warrants [notifyListeners()]
   void onUpdatedUserModel(UserModel updatedUser) async {
-    if (user.uid != updatedUser.uid) {
-      poolStatus = PoolStatus.notstarted;
+    user = updatedUser;
+    availablePools = updatedUser.membership;
+
+    if (user?.uid != updatedUser.uid) {
       selectedPoolRole = null;
       selectedPool = null;
       poolStatus =
           availablePools.isEmpty ? PoolStatus.nopools : PoolStatus.retrieved;
     }
-
-    user = updatedUser;
-    availablePools = updatedUser.membership;
 
     if (availablePools[selectedPool] == null &&
         poolStatus == PoolStatus.selected) {

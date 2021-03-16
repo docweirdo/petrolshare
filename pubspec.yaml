@@ -26,12 +26,13 @@ dependencies:
   firebase_auth: "^0.20.1"
   cloud_firestore: "^0.16.0+1"
   cloud_functions: "^0.9.0"
+  google_sign_in: ^4.5.9
 
   cupertino_icons: ^0.1.2
   intl: ^0.16.1
   spiffy_button: ^0.1.0
   provider: ^4.0.4
-  google_sign_in: ^4.1.4
+  
   http: ^0.12.0+4
   animations: ^1.0.0+5  #Work on new Entry animation later
   fluttertoast: ^4.0.0
