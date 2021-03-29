@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:petrolshare/models/LogModel.dart';
 import 'package:petrolshare/states/PoolState.dart';
 import 'package:petrolshare/widgets/CardListTile.dart';
+import 'package:flutter_slidable/flutter_slidable.dart';
 
 import 'package:provider/provider.dart';
 
@@ -28,12 +29,15 @@ class LogsTab extends StatelessWidget {
     UnmodifiableListView<LogModel> loglistEntrys = poolState.logs;
 
     return RefreshIndicator(
-        onRefresh: () => null, // TODO: Maybe decide what to do here :D
+        onRefresh: () => Future.delayed(Duration(
+            milliseconds: 500)), // TODO: Maybe decide what to do here :D
         child: ListView.builder(
             padding: const EdgeInsets.all(10.0),
             itemCount: loglistEntrys.length,
             itemBuilder: /*1*/ (context, i) {
-              return CardListTile(logModel: loglistEntrys[i]);
+              return CardListTile(
+                logModel: loglistEntrys[i],
+              );
             }));
   }
 }
