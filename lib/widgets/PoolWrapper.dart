@@ -28,14 +28,18 @@ class PoolWrapper extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    print("built PoolWrapper");
+    debugPrint("PoolWrapper: built");
 
     AppState appState = Provider.of<AppState>(context);
 
     if (appState.poolStatus == PoolStatus.retrieved) {
-      poolSelection(context, appState.availablePools).then((value) {
-        if (value != null) appState.setPool(value);
-      });
+      Future.delayed(
+          Duration.zero,
+          () => poolSelection(context, appState.availablePools).then((value) {
+                if (value != null) appState.setPool(value);
+              }));
+
+      debugPrint("PoolWrapper: AppState.poolStatus: ${appState.poolStatus}");
     }
     return _figureOutTab(appState);
   }
@@ -71,7 +75,7 @@ class PoolWrapper extends StatelessWidget {
       BuildContext context, Map<String, String> pools) {
     if (pools.isEmpty) return null;
 
-    if (pools.length == 1) return Future.value(pools.keys.toList()[0]);
+    if (pools.length == 1) return Future.value(pools.keys.first);
 
     return showDialog(
         context: context,

@@ -28,8 +28,8 @@ class PoolState extends ChangeNotifier {
   PoolStatus poolStatus = PoolStatus.notstarted;
 
   UnmodifiableListView<LogModel> get logs =>
-      UnmodifiableListView(_logs.entries.map((entry) => entry.value)).toList()
-        ..sort((a, b) => b.date.compareTo(a.date));
+      UnmodifiableListView(_logs.entries.map((entry) => entry.value).toList()
+        ..sort((a, b) => b.date.compareTo(a.date)));
   UnmodifiableMapView<String, UserModel> get members =>
       UnmodifiableMapView(_members);
 
@@ -38,7 +38,7 @@ class PoolState extends ChangeNotifier {
 
   /// Updates the ID of the current Pool and listens to changed members
   void update(String id, String name) async {
-    if (this.id == null) return;
+    if (id == null) return;
     if (this.id == id) {
       this.name = name;
       notifyListeners();
@@ -66,16 +66,27 @@ class PoolState extends ChangeNotifier {
   void onUpdatedMembers(Map<String, UserModel> newMembersMap) {
     _members = newMembersMap;
 
-    _fakeMembers.forEach((user) => _members[user.uid] = user);
+    _fakeMembers.forEach((user) {
+      if (_members.containsKey(user.uid)) return;
+      _members[user.uid] = user;
+    });
+
+    _logs.forEach((key, value) {
+      value.name = _members[value.uid].name;
+    });
     // Do something else here, idk?
+
+    debugPrint("PoolState: onUpdatedMembers() calls notifyListeners()");
     notifyListeners();
   }
 
   void onUpdatedLogs(List<dynamic> updates) {
-    List<LogModel> addedOrModified = updates[1];
-    List<String> deleted = updates[2];
+    debugPrint("PoolState: onUpdatedLogs() fired");
 
-    addedOrModified.forEach((log) {
+    Map<String, LogModel> addedOrModified = updates[0];
+    List<String> deleted = updates[1];
+
+    addedOrModified.forEach((_, log) {
       if (_members[log.uid] == null) {
         // Catch uids not present in members)
         _fakeMembers.add(UserModel(log.uid, "Monsieur Impossible", null,
@@ -94,9 +105,8 @@ class PoolState extends ChangeNotifier {
   }
 
   /// Adds a new Log Entry to the Pool
-  Future<void> addLog(LogModel log) async {
-    await DataService.addLog(log, id);
-    _logs[log.id] = log;
+  Future<void> addLog(LogModel log) {
+    return DataService.addLog(log, id);
   }
 
   Future<void> renamePool(String newPoolname) async {

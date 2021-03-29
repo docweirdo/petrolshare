@@ -16,7 +16,6 @@ class DataService {
   static Stream<UserModel> streamUserModel(UserModel user, {String poolID}) {
     DocumentReference userRef = _firestore.collection('users').doc(user.uid);
     return userRef.snapshots().map((userDoc) {
-      debugPrint("User Document Stream fired");
       if (!userDoc.exists) return user;
       return fromUserDoc(user.uid, userDoc, poolID: poolID);
     });
@@ -57,7 +56,7 @@ class DataService {
     DocumentReference poolRef = _firestore.collection('pools').doc(poolID);
 
     return poolRef.snapshots().map((poolDoc) {
-      debugPrint("Selected Pool Document Stream fired");
+      debugPrint("DataService: Document of selected Pool changed");
 
       Map<String, dynamic> poolData = poolDoc.data();
 
@@ -68,7 +67,7 @@ class DataService {
       Map<String, UserModel> members = {};
 
       poolData['members'].forEach((uid, properties) {
-        members[uid] = UserModel(
+        members[uid] = UserModel.roleString(
             uid, properties['name'], properties['photoURL'],
             role: properties['role']);
       });
@@ -85,7 +84,7 @@ class DataService {
 
     return poolRef.collection('logs').snapshots().map((snap) {
       snap.docChanges.forEach((change) {
-        debugPrint("Log Stream fired");
+        debugPrint("DataService: Log Stream fired");
 
         Map<String, dynamic> doc = change.doc.data();
 
@@ -142,8 +141,9 @@ class DataService {
 
 */
 
-  /// Checks whether Doc of given [poolID] is alright, returns role of [userID] in that pool.
-  static Future<String> checkOutPool(String poolID, String userID) async {
+  /// Checks whether Doc of given [poolID] is alright, returns role of [userID] and poolname.
+  static Future<List<dynamic>> checkOutPool(
+      String poolID, String userID) async {
     DocumentSnapshot poolSnap = await _firestore.doc('pools/$poolID').get();
     if (!poolSnap.exists) throw "Chosen pool $poolID doesn't exist";
 
@@ -155,9 +155,9 @@ class DataService {
         (poolData['name'] == null)) {
       throw "Pool $poolID is incomplete";
     }
-    if (poolData['members.$userID'] == null)
+    if (poolData['members'][userID] == null)
       throw "User $userID not member of Pool document with ID $poolID";
-    return poolData['members.$userID'];
+    return [poolData['members'][userID]['role'], poolData['name']];
   }
 
   static Future<String> createPool(String poolname) async {

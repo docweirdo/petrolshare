@@ -45,6 +45,8 @@ class AppState extends ChangeNotifier {
 
   // TODO: This function will need to decide which change warrants [notifyListeners()]
   void onUpdatedUserModel(UserModel updatedUser) async {
+    debugPrint("AppState: onUpdatedUserModel() fired");
+
     user = updatedUser;
     availablePools = updatedUser.membership;
 
@@ -65,19 +67,29 @@ class AppState extends ChangeNotifier {
       user.roleString = selectedPoolRole;
     }
 
+    debugPrint("AppState: onUpdatedUserModel() calls notifyListeners()");
     notifyListeners();
   }
 
   /// Sets the selected Pool to [poolID] if everything checks out.
-  Future<void> setPool(String poolID) async {
-    if (poolID == selectedPool) return;
+  Future<String> setPool(String poolID) async {
+    if (poolID == selectedPool) return null;
     if (user.membership[poolID] == null)
       throw "User ${user.uid} not member of Pool $poolID";
-    selectedPoolRole = await DataService.checkOutPool(poolID, user.uid);
+
+    List<dynamic> result = await DataService.checkOutPool(poolID, user.uid);
+
+    String poolName = result[1];
+    selectedPoolRole = result[0];
+
     user.roleString = selectedPoolRole;
     selectedPool = poolID;
     poolStatus = PoolStatus.selected;
+
+    debugPrint("AppState: setPool() calls notifyListeners()");
     notifyListeners();
+
+    return poolName;
   }
 
   /// Creates a new Pool of name [poolname] in the name of

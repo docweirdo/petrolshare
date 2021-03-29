@@ -2,6 +2,7 @@ import 'dart:collection';
 
 import 'package:flutter/widgets.dart';
 import 'package:flutter/material.dart';
+import 'package:petrolshare/models/LogModel.dart';
 import 'package:petrolshare/states/PoolState.dart';
 import 'package:petrolshare/widgets/CardListTile.dart';
 
@@ -19,11 +20,12 @@ class LogsTab extends StatelessWidget {
         return _buildLogList(context, poolState);
       else
         return Center(child: CircularProgressIndicator());
+      //TODO: Needs no logs screen
     });
   }
 
   Widget _buildLogList(BuildContext context, PoolState poolState) {
-    UnmodifiableListView loglistEntrys = poolState.logs;
+    UnmodifiableListView<LogModel> loglistEntrys = poolState.logs;
 
     return RefreshIndicator(
         onRefresh: () => null, // TODO: Maybe decide what to do here :D

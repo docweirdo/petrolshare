@@ -108,10 +108,9 @@ class ManageTab extends StatelessWidget {
                         poolSelection(context, appState.availablePools)
                             .then((value) {
                           if (value != null && value != appState.selectedPool) {
-                            appState.setPool(value).then((value) {
+                            appState.setPool(value).then((poolName) {
                               Scaffold.of(context).showSnackBar(SnackBar(
-                                  content:
-                                      Text('Switched to ${poolState.name}'),
+                                  content: Text('Switched to $poolName'),
                                   duration: Duration(seconds: 2)));
                             });
                           }
