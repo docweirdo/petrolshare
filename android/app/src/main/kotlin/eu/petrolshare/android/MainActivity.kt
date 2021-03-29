@@ -1,4 +1,4 @@
-package de.docweirdo.petrolshare
+package eu.petrolshare.android;
 
 import io.flutter.embedding.android.FlutterActivity
 

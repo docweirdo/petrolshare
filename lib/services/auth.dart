@@ -1,50 +1,24 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/material.dart';
 import 'package:google_sign_in/google_sign_in.dart';
-import 'package:petrolshare/models/UserModel.dart';
 
 class AuthSevice {
-  final FirebaseAuth _auth = FirebaseAuth.instance;
-  final GoogleSignIn _googleSignIn = GoogleSignIn();
+  static final FirebaseAuth _auth = FirebaseAuth.instance;
+  static final GoogleSignIn _googleSignIn = GoogleSignIn();
 
   // auth change user stream
-  Stream<UserModel> get user {
-    return _auth.onAuthStateChanged.asyncMap((FirebaseUser user) async {
-      if (user == null) return null;
-
-      print("Auth state changed");
-
-      DocumentReference userRef =
-          Firestore.instance.collection('users').document(user.uid);
-      DocumentSnapshot userDoc = await userRef.get();
-
-      if (!userDoc.exists) {
-        return UserModel(
-            user.uid,
-            user.isAnonymous ? 'Anonymous' : user.displayName,
-            user.photoUrl,
-            false,
-            null,
-            user.isAnonymous ? null : (user.email ?? user.phoneNumber),
-            user.isAnonymous);
-      } else
-        return UserModel(
-            user.uid,
-            userDoc['name'],
-            userDoc['photoURL'],
-            true,
-            null,
-            user.isAnonymous ? null : (user.email ?? user.phoneNumber),
-            user.isAnonymous);
-    });
+  Stream<User> get user {
+    debugPrint("AuthService, user state changed");
+    return _auth.authStateChanges();
   }
 
   // sign in anonymously
-  Future<FirebaseUser> signInAnon() async {
+  Future<User> signInAnon() async {
     /*
     try {
       AuthResult result = await _auth.signInAnonymously();
-      FirebaseUser user = result.user;
+      User user = result.user;
       updateUserData(user);
       return user;
     } catch (e) {
@@ -59,7 +33,7 @@ class AuthSevice {
         .signInAnonymously()
         .then((result) => result.user)
         .catchError((error) {
-      print(error.toString());
+      debugPrint(error.toString());
       return null;
     });
   }
@@ -67,23 +41,23 @@ class AuthSevice {
   // sign in with email & password
 
   // sign in silently with Google
-  Future<FirebaseUser> signInSilentlyGoogle() async {
+  Future<User> signInSilentlyGoogle() async {
     GoogleSignInAccount googleUser;
-    FirebaseUser user;
+    User user;
 
     try {
       googleUser = await _googleSignIn.signInSilently();
       if (googleUser == null) throw 'SignIn Silently failed';
       GoogleSignInAuthentication googleAuth = await googleUser.authentication;
-      AuthCredential credential = GoogleAuthProvider.getCredential(
+      AuthCredential credential = GoogleAuthProvider.credential(
         accessToken: googleAuth.accessToken,
         idToken: googleAuth.idToken,
       );
       user = await _auth
           .signInWithCredential(credential)
-          .then((AuthResult result) => result.user);
+          .then((UserCredential result) => result.user);
     } catch (e) {
-      print("AuthService, Silent Google Sign in failed: " + e.toString());
+      debugPrint("AuthService, Silent Google Sign in failed: " + e.toString());
     }
 
     if (user == null) {
@@ -93,16 +67,16 @@ class AuthSevice {
   }
 
   // sign in with Google
-  Future<FirebaseUser> signInGoogle() async {
+  Future<User> signInGoogle() async {
     GoogleSignInAccount googleUser = await _googleSignIn.signIn();
     GoogleSignInAuthentication googleAuth = await googleUser.authentication;
-    AuthCredential credential = GoogleAuthProvider.getCredential(
+    AuthCredential credential = GoogleAuthProvider.credential(
       accessToken: googleAuth.accessToken,
       idToken: googleAuth.idToken,
     );
-    FirebaseUser user = await _auth
+    User user = await _auth
         .signInWithCredential(credential)
-        .then((AuthResult result) => result.user);
+        .then((UserCredential result) => result.user);
     if (user == null) {
       return null;
     }
@@ -114,52 +88,44 @@ class AuthSevice {
   // sign out
   Future signOut() async {
     bool googleUser = await _googleSignIn.isSignedIn();
-    FirebaseUser user = await _auth.currentUser();
+    User user = _auth.currentUser;
 
     try {
       if (googleUser) {
         await _googleSignIn.signOut();
-      } else if (user.isAnonymous){
+      } else if (user.isAnonymous) {
         return user.delete();
       }
 
       return _auth.signOut();
     } catch (e) {
-      print("AuthService, Logout: " + e.toString());
+      debugPrint("AuthService, Logout: " + e.toString());
 
       return null;
     }
   }
 
-  Future<void> changeUsername(String username) async{
+  Future<void> changeUsername(String username) async {
+    User user = _auth.currentUser;
 
-    FirebaseUser user = await _auth.currentUser();
-
-    UserUpdateInfo updateInfo = UserUpdateInfo();
-
-    updateInfo.displayName = username;
-
-    try{
-      await user.updateProfile(updateInfo);
-    } catch (e){
+    try {
+      await user.updateProfile(displayName: username);
+    } catch (e) {
       return Future.error(e);
     }
 
     DocumentReference userRef =
-          Firestore.instance.collection('users').document(user.uid);
+        FirebaseFirestore.instance.collection('users').doc(user.uid);
 
-    return userRef.updateData({"name": username});
-
+    return userRef.update({"name": username});
   }
 
-  Future<void> deleteAccount() async{
-
-    FirebaseUser user = await _auth.currentUser();
+  Future<void> deleteAccount() async {
+    User user = _auth.currentUser;
 
     bool googleUser = await _googleSignIn.isSignedIn();
-    
 
-    if (googleUser){
+    if (googleUser) {
       await _googleSignIn.signOut();
     }
 
@@ -167,6 +133,4 @@ class AuthSevice {
 
     return;
   }
-
-
 }

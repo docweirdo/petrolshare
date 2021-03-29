@@ -1,6 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 
-
 class LogModel {
   String id;
   String uid;
@@ -11,9 +10,12 @@ class LogModel {
   String name;
   String notes;
 
-  LogModel(this.id, this.uid, this.roadmeter, this.price, this.amount, this.date, this.name, this.notes);
+  LogModel(this.id, this.uid, this.roadmeter, this.price, this.amount,
+      this.date, this.name, this.notes);
 
-  LogModel.firebase(this.id, this.uid, this.roadmeter, this.price, this.amount, Timestamp date, this.name, this.notes) : this.date = date.toDate();
+  LogModel.firebase(this.id, this.uid, this.roadmeter, this.price, this.amount,
+      Timestamp date, this.notes)
+      : this.date = date.toDate();
 
   Map<String, dynamic> toMap() {
     return {
@@ -22,8 +24,7 @@ class LogModel {
       'date': date,
       'price': price,
       'amount': amount,
-      'notes' : notes,
+      'notes': notes,
     };
   }
-  
 }

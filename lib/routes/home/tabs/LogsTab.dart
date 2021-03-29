@@ -2,43 +2,44 @@ import 'dart:collection';
 
 import 'package:flutter/widgets.dart';
 import 'package:flutter/material.dart';
-import 'package:petrolshare/states/LogList.dart';
+import 'package:petrolshare/models/LogModel.dart';
+import 'package:petrolshare/states/PoolState.dart';
 import 'package:petrolshare/widgets/CardListTile.dart';
-
+import 'package:flutter_slidable/flutter_slidable.dart';
 
 import 'package:provider/provider.dart';
 
-class LogsTab extends StatelessWidget{
+class LogsTab extends StatelessWidget {
   LogsTab({Key key}) : super(key: key);
 
   @override
-  Widget build(BuildContext context){
-    return Consumer<LogList>(
-      builder: (context, loglist, _) {
-        if (loglist == null) return Container();    
-        else if (loglist.hasBeenCalled) return _buildLogList(context, loglist);
-        else return Center(child: CircularProgressIndicator());
-      }
-    );
+  Widget build(BuildContext context) {
+    return Consumer<PoolState>(builder: (context, poolState, _) {
+      if (poolState.logs == null)
+        return Container();
+      else if (poolState.logState == LogState.retrieved)
+        return _buildLogList(context, poolState);
+      else
+        return Center(child: CircularProgressIndicator());
+      //TODO: Needs no logs screen
+    });
   }
 
-  Widget _buildLogList(BuildContext context, LogList loglist) {
-
-    UnmodifiableListView loglistEntrys = loglist.logs;
+  Widget _buildLogList(BuildContext context, PoolState poolState) {
+    UnmodifiableListView<LogModel> loglistEntrys = poolState.logs;
 
     return RefreshIndicator(
-      onRefresh: loglist.refreshLogs,
-      child: ListView.builder(
-        padding: const EdgeInsets.all(10.0),
-        itemCount: loglist.length,
-        itemBuilder: /*1*/ (context, i) {
-          return CardListTile(logModel: loglistEntrys[i]);
-        })
-    );
+        onRefresh: () => Future.delayed(Duration(
+            milliseconds: 500)), // TODO: Maybe decide what to do here :D
+        child: ListView.builder(
+            padding: const EdgeInsets.all(10.0),
+            itemCount: loglistEntrys.length,
+            itemBuilder: /*1*/ (context, i) {
+              return CardListTile(
+                logModel: loglistEntrys[i],
+              );
+            }));
   }
-
-
-  
 }
 
 /*
