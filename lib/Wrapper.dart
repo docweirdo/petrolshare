@@ -14,29 +14,30 @@ class Wrapper extends StatelessWidget {
   Widget build(BuildContext context) {
     //_auth.signInSilentlyGoogle(); Why is this here
 
+    final ThemeData theme = ThemeData();
+
     debugPrint("Wrapper: built");
 
-    return Consumer<User>(builder: (_, user, child) {
+    return Consumer<User?>(builder: (_, user, child) {
       if (user == null)
         return AuthenticateRoute();
-      else
-        return ChangeNotifierProvider<AppState>(
+      else  
+         return ChangeNotifierProvider<AppState>(
           create: (context) => AppState(user),
-          child: ChangeNotifierProxyProvider<AppState, PoolState>(
+          child: ChangeNotifierProxyProvider<AppState, PoolState?>(
             create: (context) => PoolState(),
             update: (_, appState, poolState) => poolState
-              ..update(appState.selectedPool,
+              ?..update(appState.selectedPool,
                   appState.availablePools[appState.selectedPool]),
             child: MaterialApp(
               title: _title,
               home: HomeRoute(),
               debugShowCheckedModeBanner: false,
               navigatorObservers: [routeObserver],
-              theme: ThemeData(
-                primaryColor: Colors.white,
-                accentColor: Colors.deepOrange[300],
-                primaryTextTheme: Typography.blackCupertino,
+              theme: theme.copyWith(
+                colorScheme: theme.colorScheme.copyWith(secondary: Colors.deepOrange[300], primary: Colors.white),
                 textTheme: Typography.blackCupertino,
+                primaryTextTheme: Typography.blackCupertino,
                 bottomSheetTheme: BottomSheetThemeData(
                   backgroundColor: Colors.white,
                   shape: RoundedRectangleBorder(

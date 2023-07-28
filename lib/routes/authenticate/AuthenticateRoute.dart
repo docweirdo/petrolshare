@@ -8,6 +8,7 @@ class AuthenticateRoute extends StatefulWidget {
 
 class _AuthenticateRouteState extends State<AuthenticateRoute> {
   static const String _title = 'Petrolshare';
+  final ThemeData theme = ThemeData();
 
   @override
   Widget build(BuildContext context) {
@@ -15,11 +16,16 @@ class _AuthenticateRouteState extends State<AuthenticateRoute> {
       title: _title,
       home: Container(child: SignIn()),
       debugShowCheckedModeBanner: false,
-      theme: ThemeData(
-        primaryColor: Colors.white,
-        accentColor: Colors.deepOrange[300],
-        primaryTextTheme: Typography.blackCupertino,
+      theme: theme.copyWith(
+        colorScheme: theme.colorScheme
+            .copyWith(secondary: Colors.deepOrange[300], primary: Colors.white),
         textTheme: Typography.blackCupertino,
+        primaryTextTheme: Typography.blackCupertino,
+        bottomSheetTheme: BottomSheetThemeData(
+          backgroundColor: Colors.white,
+          shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.vertical(top: Radius.circular(10))),
+        ),
       ),
     );
   }

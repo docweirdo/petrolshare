@@ -11,8 +11,8 @@ import 'dart:collection';
 enum LogState { notstarted, nologs, retrieved }
 
 class PoolState extends ChangeNotifier {
-  String id;
-  String name;
+  String? id;
+  String? name;
 
   Map<String, UserModel> _members = {};
 
@@ -22,8 +22,8 @@ class PoolState extends ChangeNotifier {
   LogState logState = LogState.notstarted;
   Map<String, LogModel> _logs = {};
 
-  StreamSubscription<Map<String, UserModel>> poolStream;
-  StreamSubscription<List<dynamic>> logStream;
+  StreamSubscription<Map<String, UserModel>>? poolStream;
+  StreamSubscription<List<dynamic>>? logStream;
 
   PoolStatus poolStatus = PoolStatus.notstarted;
 
@@ -37,7 +37,7 @@ class PoolState extends ChangeNotifier {
   int get logCount => _logs.length;
 
   /// Updates the ID of the current Pool and listens to changed members
-  void update(String id, String name) async {
+  void update(String? id, String? name) async {
     if (id == null) return;
     if (this.id == id) {
       this.name = name;
@@ -72,7 +72,7 @@ class PoolState extends ChangeNotifier {
     });
 
     _logs.forEach((key, value) {
-      value.name = _members[value.uid].name;
+      value.name = _members[value.uid]?.name;
     });
     // Do something else here, idk?
 
@@ -94,7 +94,7 @@ class PoolState extends ChangeNotifier {
         _members[log.uid] = _fakeMembers.last;
       }
 
-      log.name = _members[log.uid].name;
+      log.name = _members[log.uid]?.name;
       _logs[log.id] = log;
     });
     _logs.removeWhere((key, value) => deleted.contains(key));
@@ -106,7 +106,7 @@ class PoolState extends ChangeNotifier {
 
   /// Adds a new Log Entry to the Pool
   Future<void> addLog(LogModel log) {
-    return DataService.addLog(log, id);
+    return DataService.addLog(log, id!);
   }
 
   Future<void> renamePool(String newPoolname) async {
@@ -116,17 +116,17 @@ class PoolState extends ChangeNotifier {
     // Presumably triggers UserDoc Stream in AppState, so no further
     // action like updating Membership list and available pools?
     name = newPoolname;
-    await DataService.renamePool(id, newPoolname);
+    await DataService.renamePool(id!, newPoolname);
     notifyListeners();
   }
 
   Future<void> makeAdmin(UserModel user) async {
     // TODO: Check for anonymity, possibly add field to membership map in DB
-    await DataService.makeAdmin(user.uid, id);
+    await DataService.makeAdmin(user.uid, id!);
   }
 
   Future<void> removeMember(String userID) async {
     // Should trigger Membership Stream, no further action
-    await DataService.removeMemberFromPool(userID, id);
+    await DataService.removeMemberFromPool(userID, id!);
   }
 }

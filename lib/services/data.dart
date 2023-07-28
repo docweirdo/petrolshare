@@ -13,7 +13,7 @@ class DataService {
   /// Takes a [UserModel] and a [Pool] and listens to changes to the UserDoc.
   ///
   /// Returns a Stream of an updated UserModel using [getUserModel(String uid, String poolID)].
-  static Stream<UserModel> streamUserModel(UserModel user, {String poolID}) {
+  static Stream<UserModel?> streamUserModel(UserModel user, {String? poolID}) {
     DocumentReference userRef = _firestore.collection('users').doc(user.uid);
     return userRef.snapshots().map((userDoc) {
       if (!userDoc.exists) return user;
@@ -22,7 +22,7 @@ class DataService {
   }
 
   /// Retrieves the UserModel corresponding to an [UID].
-  static Future<UserModel> getUserModel(String uid, {String poolID}) async {
+  static Future<UserModel?> getUserModel(String uid, {String? poolID}) async {
     DocumentSnapshot userDoc = await _firestore.doc('users/$uid').get();
 
     if (!userDoc.exists) return null;
@@ -32,17 +32,18 @@ class DataService {
 
   /// Takes a Firebase User Document converts it to a UserModel
   static UserModel fromUserDoc(String uid, DocumentSnapshot userDoc,
-      {String poolID}) {
-    if (!userDoc.exists) return null;
+      {String? poolID}) {
 
-    Map<String, dynamic> userData = userDoc.data();
+    Map<String, dynamic> userData = userDoc.data() as Map<String, dynamic>;
 
     Map<String, String> membership;
-    String identifier =
+    String? identifier =
         userData['identifier'] ?? userData['email'] ?? userData['phone'];
 
-    if (userData['membership'] != null && userData['membership'].isNotEmpty)
+    if (userData['membership'].isNotEmpty) 
       membership = Map.from(userData['membership']);
+    else 
+      membership = {};
 
     return UserModel(uid, userData['name'], userData['photoURL'],
         role: poolID == null ? null : userData['membership.$poolID'],
@@ -58,7 +59,7 @@ class DataService {
     return poolRef.snapshots().map((poolDoc) {
       debugPrint("DataService: Document of selected Pool changed");
 
-      Map<String, dynamic> poolData = poolDoc.data();
+      Map<String, dynamic> poolData = poolDoc.data() as Map<String, dynamic>;
 
       if (!poolDoc.exists || poolData['members'] == null) {
         throw "Pool $poolID members field doesn't exist";
@@ -86,19 +87,19 @@ class DataService {
       snap.docChanges.forEach((change) {
         debugPrint("DataService: Log Stream fired");
 
-        Map<String, dynamic> doc = change.doc.data();
+        Map<String, dynamic>? doc = change.doc.data();
 
         switch (change.type) {
           case DocumentChangeType.added:
           case DocumentChangeType.modified:
             addedOrModified[change.doc.id] = LogModel.firebase(
                 change.doc.id,
-                doc['uid'],
-                doc['roadmeter'],
-                doc['price'],
-                doc['amount'],
-                doc['date'],
-                doc['notes']);
+                doc?['uid'],
+                doc?['roadmeter'],
+                doc?['price'],
+                doc?['amount'],
+                doc?['date'],
+                doc?['notes']);
             break;
           case DocumentChangeType.removed:
             removed.add(change.doc.id);
@@ -147,7 +148,7 @@ class DataService {
     DocumentSnapshot poolSnap = await _firestore.doc('pools/$poolID').get();
     if (!poolSnap.exists) throw "Chosen pool $poolID doesn't exist";
 
-    Map<String, dynamic> poolData = poolSnap.data();
+    Map<String, dynamic> poolData = poolSnap.data() as Map<String, dynamic>;
 
     if ((poolData['members'] == null) ||
         (poolData['founder'] == null) ||

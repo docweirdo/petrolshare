@@ -7,7 +7,7 @@ class LogModel {
   DateTime date;
   var price;
   var amount;
-  String name;
+  String? name;
   String notes;
 
   LogModel(this.id, this.uid, this.roadmeter, this.price, this.amount,

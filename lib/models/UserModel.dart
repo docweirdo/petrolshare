@@ -1,17 +1,19 @@
 import 'dart:typed_data';
 import 'package:http/http.dart' as http;
+import 'package:flutter/material.dart';
+
 
 enum UserRole { Admin, Member, FormerMember }
 
 class UserModel {
   String uid;
   String name;
-  Uint8List photoBytes;
-  String photoURL;
-  UserRole role;
-  String identifier;
-  bool isAnonymous;
-  Map<String, String> membership = {};
+  Uint8List? photoBytes;
+  String? photoURL;
+  UserRole? role;
+  String? identifier;
+  bool? isAnonymous;
+  Map<String, String>? membership = {};
 
   UserModel(this.uid, this.name, this.photoURL,
       {this.role, this.identifier, this.isAnonymous, this.membership}) {
@@ -19,12 +21,12 @@ class UserModel {
   }
 
   UserModel.roleString(this.uid, this.name, this.photoURL,
-      {String role, this.identifier, this.isAnonymous, this.membership}) {
+      {required String role, this.identifier, this.isAnonymous, this.membership}) {
     roleString = role;
     photo = photoURL;
   }
 
-  set roleString(String roleString) {
+  set roleString(String? roleString) {
     switch (roleString) {
       case 'member':
         role = UserRole.Member;
@@ -40,31 +42,30 @@ class UserModel {
     }
   }
 
-  String get roleString {
+  String? get roleString {
     switch (role) {
       case UserRole.Member:
         return 'member';
-        break;
       case UserRole.FormerMember:
         return 'formerMember';
-        break;
       case UserRole.Admin:
         return 'admin';
-        break;
       default:
+        debugPrint('UserModel.roleString fired, no matching role');
         return null;
     }
   }
 
-  set photo(String photoURL) {
+  set photo(String? photoURL) {
     loadPhotoFromURL(photoURL);
   }
 
-  Future<void> loadPhotoFromURL(String url) async {
+  Future<void> loadPhotoFromURL(String? url) async {
     if (url != null) {
       try {
         photoURL = url;
-        photoBytes = await http.readBytes(url, headers: {});
+        var uri = Uri.parse(url);
+        photoBytes = await http.readBytes(uri, headers: {});
       } catch (e) {
         print('Fetch Profile Pic: ' + e.toString());
       }

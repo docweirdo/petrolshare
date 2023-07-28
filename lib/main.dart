@@ -30,8 +30,9 @@ class MyApp extends StatelessWidget {
 
         // Once complete, show your application
         if (snapshot.connectionState == ConnectionState.done) {
-          return StreamProvider<User>.value(
+          return StreamProvider<User?>.value(
             value: AuthSevice().user,
+            initialData: null,
             child: Wrapper(),
           );
         }

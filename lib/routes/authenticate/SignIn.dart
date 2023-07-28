@@ -27,10 +27,10 @@ class _SignInState extends State<SignIn> {
                 mainAxisAlignment: MainAxisAlignment.center,
                 mainAxisSize: MainAxisSize.min,
                 children: <Widget>[
-                  OutlineButton.icon(
+                  OutlinedButton.icon(
                     label: Text('GOOGLE'),
                     icon: Icon(Icons.supervised_user_circle),
-                    textColor: Theme.of(context).accentColor,
+                    //textColor: Theme.of(context).accentColor,
                     onPressed: () async {
                       dynamic result = await _auth.signInGoogle();
                       if (result == null) {
@@ -41,23 +41,24 @@ class _SignInState extends State<SignIn> {
                       }
                     },
                   ),
-                  OutlineButton.icon(
+                  OutlinedButton.icon(
                     label: Text('EMAIL'),
                     icon: Icon(Icons.email),
-                    textColor: Theme.of(context).accentColor,
+                    //textColor: Theme.of(context).accentColor,
                     onPressed: () async {
-                      User result = await _auth.signInAnon();
+                      User? result = await _auth.signInAnon();
                       if (result == null) {
                         print('error signing in');
                       } else {
                         print('signed in');
                         print(result.uid);
+
                       }
                     },
                   ),
                   Container(
                     padding: EdgeInsets.all(20),
-                    child: FlatButton(
+                    child: TextButton(
                       child: Text('Skip'),
                       onPressed: () async {
                         dynamic result = await _auth.signInAnon();

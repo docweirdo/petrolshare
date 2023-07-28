@@ -8,13 +8,13 @@ class AuthSevice {
   static final GoogleSignIn _googleSignIn = GoogleSignIn();
 
   // auth change user stream
-  Stream<User> get user {
-    debugPrint("AuthService, user state changed");
-    return _auth.authStateChanges();
+  Stream<User?> get user {
+    debugPrint("AuthService, user changes occured");
+    return _auth.userChanges();
   }
 
   // sign in anonymously
-  Future<User> signInAnon() async {
+  Future<User?> signInAnon() async {
     /*
     try {
       AuthResult result = await _auth.signInAnonymously();
@@ -41,9 +41,9 @@ class AuthSevice {
   // sign in with email & password
 
   // sign in silently with Google
-  Future<User> signInSilentlyGoogle() async {
-    GoogleSignInAccount googleUser;
-    User user;
+  Future<User?> signInSilentlyGoogle() async {
+    GoogleSignInAccount? googleUser;
+    User? user;
 
     try {
       googleUser = await _googleSignIn.signInSilently();
@@ -67,14 +67,14 @@ class AuthSevice {
   }
 
   // sign in with Google
-  Future<User> signInGoogle() async {
-    GoogleSignInAccount googleUser = await _googleSignIn.signIn();
-    GoogleSignInAuthentication googleAuth = await googleUser.authentication;
+  Future<User?> signInGoogle() async {
+    GoogleSignInAccount? googleUser = await _googleSignIn.signIn();
+    GoogleSignInAuthentication? googleAuth = await googleUser?.authentication;
     AuthCredential credential = GoogleAuthProvider.credential(
-      accessToken: googleAuth.accessToken,
-      idToken: googleAuth.idToken,
+      accessToken: googleAuth?.accessToken,
+      idToken: googleAuth?.idToken,
     );
-    User user = await _auth
+    User? user = await _auth
         .signInWithCredential(credential)
         .then((UserCredential result) => result.user);
     if (user == null) {
@@ -88,12 +88,12 @@ class AuthSevice {
   // sign out
   Future signOut() async {
     bool googleUser = await _googleSignIn.isSignedIn();
-    User user = _auth.currentUser;
+    User? user = _auth.currentUser;
 
     try {
       if (googleUser) {
         await _googleSignIn.signOut();
-      } else if (user.isAnonymous) {
+      } else if (user != null && user.isAnonymous) {
         return user.delete();
       }
 
@@ -106,22 +106,22 @@ class AuthSevice {
   }
 
   Future<void> changeUsername(String username) async {
-    User user = _auth.currentUser;
+    User? user = _auth.currentUser;
 
     try {
-      await user.updateProfile(displayName: username);
+      await user?.updateDisplayName(username);
     } catch (e) {
       return Future.error(e);
     }
 
     DocumentReference userRef =
-        FirebaseFirestore.instance.collection('users').doc(user.uid);
+        FirebaseFirestore.instance.collection('users').doc(user?.uid);
 
     return userRef.update({"name": username});
   }
 
   Future<void> deleteAccount() async {
-    User user = _auth.currentUser;
+    User? user = _auth.currentUser;
 
     bool googleUser = await _googleSignIn.isSignedIn();
 
@@ -129,7 +129,7 @@ class AuthSevice {
       await _googleSignIn.signOut();
     }
 
-    await user.delete();
+    await user?.delete();
 
     return;
   }
