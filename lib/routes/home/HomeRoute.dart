@@ -1,57 +1,57 @@
 import 'dart:async';
+import 'dart:js_util';
 import 'package:petrolshare/models/LogModel.dart';
 import 'package:petrolshare/models/UserModel.dart';
 import 'package:petrolshare/states/AppState.dart';
-import 'package:petrolshare/widgets/open_container_push_future.dart';
 import 'package:flutter/material.dart';
 import 'package:petrolshare/routes/home/NewEntryRoute.dart';
 import 'package:petrolshare/states/PoolState.dart';
 import 'package:petrolshare/widgets/PoolWrapper.dart';
 import 'package:provider/provider.dart';
-import 'package:spiffy_button/spiffy_button.dart';
+import 'package:animations/animations.dart';
 
 final duration = const Duration(milliseconds: 250);
 
 class HomeRoute extends StatefulWidget {
-  HomeRoute({Key key}) : super(key: key);
+  HomeRoute({super.key});
 
   @override
   _HomeRouteState createState() => _HomeRouteState();
 }
 
+// TODO: Are AppState, PoolState and Usermodel really needed outside the build function?
 class _HomeRouteState extends State<HomeRoute> with RouteAware {
   int _selectedIndex = 0;
   bool scrolling = false;
   bool _fabVisible = true;
-  PoolState poolState;
+  PoolState? poolState;
 
-  final _fabKey = GlobalKey<SpiffyButtonState>();
-  AppState appState;
-  UserModel user;
+  AppState? appState;
+  UserModel? user;
 
   @override
   void initState() {
     super.initState();
-    animate();
+    // animate();
   }
 
-  void animate() async {
-    final pause = const Duration(milliseconds: 100);
+  // void animate() async {
+  //   final pause = const Duration(milliseconds: 100);
 
-    if (appState.poolStatus == PoolStatus.selected) {
-      // TODO: Find better way to position PoolStatus than in AppState
-      await Future.delayed(pause);
-      _fabKey.currentState.pose = SpiffyButtonPose.shownIconAndLabel;
-    }
-  }
+  //   if (appState.poolStatus == PoolStatus.selected) {
+  //     // TODO: Find better way to position PoolStatus than in AppState
+  //     await Future.delayed(pause);
+  //     _fabKey.currentState.pose = SpiffyButtonPose.shownIconAndLabel;
+  //   }
+  // }
 
   void _onItemTapped(int index) {
     setState(() {
       _selectedIndex = index;
       _fabVisible = _selectedIndex == 0;
-      if (index == 0) {
-        animate();
-      }
+      // if (index == 0) {
+      //   animate();
+      // }
     });
   }
 
@@ -59,7 +59,7 @@ class _HomeRouteState extends State<HomeRoute> with RouteAware {
   Widget build(BuildContext context) {
     appState = Provider.of<AppState>(context);
     poolState = Provider.of<PoolState>(context);
-    user = appState.user;
+    user = appState?.user;
 
     debugPrint("HomeRoute: built");
 
@@ -69,30 +69,14 @@ class _HomeRouteState extends State<HomeRoute> with RouteAware {
           title: FittedBox(
             child: Text(_selectedIndex == 2
                 ? 'Petrolshare'
-                : (poolState.name ?? 'Petrolshare')),
+                : (poolState?.name ?? 'Petrolshare')),
             fit: BoxFit.scaleDown,
           ),
           centerTitle: true,
           elevation: 1.0,
           backgroundColor: Theme.of(context).primaryColor,
         ),
-        body: NotificationListener<ScrollEndNotification>(
-          onNotification: (end) {
-            if (end.metrics.pixels == 0.0) {
-              _fabKey.currentState?.pose = SpiffyButtonPose.shownIconAndLabel;
-              scrolling = false;
-            }
-            return true;
-          },
-          child: NotificationListener<ScrollStartNotification>(
-            onNotification: (start) {
-              _fabKey.currentState?.pose = SpiffyButtonPose.shownIcon;
-              scrolling = true;
-              return true;
-            },
-            child: PoolWrapper(_selectedIndex),
-          ),
-        ),
+        body: PoolWrapper(_selectedIndex),
         bottomNavigationBar: BottomNavigationBar(
           items: const <BottomNavigationBarItem>[
             BottomNavigationBarItem(
@@ -109,44 +93,54 @@ class _HomeRouteState extends State<HomeRoute> with RouteAware {
             ),
           ],
           currentIndex: _selectedIndex,
-          selectedItemColor: Theme.of(context).accentColor,
+          selectedItemColor: Theme.of(context).colorScheme.secondary,
           onTap: _onItemTapped,
         ),
         floatingActionButton: Visibility(
-          child: OpenContainerPushFuture(
-              openBuilder: (BuildContext context, VoidCallback _) {
-                return NewEntryRoute();
-              },
-              closedElevation: 6.0,
-              closedShape: const RoundedRectangleBorder(
-                borderRadius: BorderRadius.all(Radius.circular(30)),
+          child: OpenContainer(
+        openBuilder: (BuildContext context, VoidCallback _) {
+          return NewEntryRoute();
+        },
+        closedElevation: 6.0,
+        closedShape: const RoundedRectangleBorder(
+          borderRadius: BorderRadius.all(
+            Radius.circular(30),
+          ),
+        ),
+        closedColor: Theme.of(context).colorScheme.secondary,
+        closedBuilder: (BuildContext context, VoidCallback openContainer) {
+          return InkWell(
+            child: SizedBox(
+              height: 15,
+              width: 15,
+              child: Center(
+                child: Icon(
+                  Icons.local_gas_station,
+                  color: Theme.of(context).colorScheme.onSecondary,
+                ),
               ),
-              closedColor: Theme.of(context).colorScheme.secondary,
-              closedBuilder: (BuildContext context, Function openContainer) {
-                return SpiffyButton(
-                    key: _fabKey,
-                    icon: Icon(Icons.local_gas_station),
-                    label: Text("Add"),
-                    initialPose: SpiffyButtonPose.shownIcon,
-                    onTouchDown: () async {
-                      dynamic result = await openContainer();
+            ),
+            onTapDown: (_) => openContainer()
+          );},
+          onClosed: (Map<String, dynamic>? result) {
                       if (result != null) {
-                        poolState.addLog(LogModel(
+                        poolState?.addLog(LogModel(
                             ValueKey(result['roadmeter']).toString(),
-                            user.uid,
+                            user!.uid,
                             result['roadmeter'],
                             result['price'],
                             result['amount'],
                             result['date'],
-                            user.name,
+                            user!.name,
                             result['notes']));
-                        Scaffold.of(context).showSnackBar(
+                        ScaffoldMessenger.of(context).showSnackBar(
+
                             SnackBar(content: Text('Entry added')));
                       }
-                    });
-              }),
+          }
+      ),
           visible:
-              (_fabVisible && (appState.poolStatus == PoolStatus.selected)),
+              (_fabVisible && (appState?.poolStatus == PoolStatus.selected)),
         ));
   }
 }
