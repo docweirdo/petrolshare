@@ -8,13 +8,13 @@ class NewEntryRoute extends StatefulWidget {
 
 class _NewEntryRouteState extends State<NewEntryRoute> {
   final _formKey = GlobalKey<FormState>();
-  TextEditingController _textController;
+  late TextEditingController _textController;
 
   DateTime pickedDate = DateTime.now();
-  double amount;
-  double price;
-  double roadmeter;
-  String additionalNote;
+  double? amount;
+  double? price;
+  double? roadmeter;
+  String? additionalNote;
 
   @override
   void initState() {
@@ -30,12 +30,12 @@ class _NewEntryRouteState extends State<NewEntryRoute> {
       appBar: AppBar(
         elevation: 0,
         title: Text('New Entry'),
-        backgroundColor: Theme.of(context).accentColor,
+        backgroundColor: Theme.of(context).colorScheme.secondary,
       ),
       floatingActionButton: FloatingActionButton(
         child: Icon(Icons.done),
         onPressed: () {
-          if (_formKey.currentState.validate()) {
+          if (_formKey.currentState != null && _formKey.currentState!.validate()) {
             Navigator.pop(context, {
               'roadmeter': roadmeter,
               'price': price,
@@ -53,7 +53,7 @@ class _NewEntryRouteState extends State<NewEntryRoute> {
             child: Column(children: <Widget>[
               Container(
                 decoration: BoxDecoration(
-                    color: Theme.of(context).accentColor,
+                    color: Theme.of(context).colorScheme.secondary,
                     boxShadow: [
                       BoxShadow(
                         color: Colors.grey,
@@ -75,7 +75,7 @@ class _NewEntryRouteState extends State<NewEntryRoute> {
                         counterText: "",
                       ),
                       validator: (value) {
-                        if (value.isEmpty)
+                        if (value == null || value.isEmpty)
                           return 'Required';
                         else if (!isNumeric(value)) return 'Not a number';
                         return null;
@@ -98,7 +98,7 @@ class _NewEntryRouteState extends State<NewEntryRoute> {
                         counterText: "",
                       ),
                       validator: (value) {
-                        if (value.isEmpty)
+                        if (value == null || value.isEmpty)
                           return 'Required';
                         else if (!isNumeric(value)) return 'Not a number';
                         return null;
@@ -121,7 +121,7 @@ class _NewEntryRouteState extends State<NewEntryRoute> {
                         counterText: "",
                       ),
                       validator: (value) {
-                        if (value.isEmpty)
+                        if (value == null || value.isEmpty)
                           return 'Required';
                         else if (!isNumeric(value)) return 'Not a number';
                         return null;
@@ -138,8 +138,7 @@ class _NewEntryRouteState extends State<NewEntryRoute> {
               ),
               Theme(
                 data: Theme.of(context).copyWith(
-                  accentColor: Theme.of(context).primaryColor,
-                  primaryColor: Theme.of(context).accentColor,
+                  colorScheme: Theme.of(context).colorScheme.copyWith(secondary: Theme.of(context).colorScheme.primary, primary: Theme.of(context).colorScheme.secondary),
                 ),
                 child: Container(
                   padding: EdgeInsets.fromLTRB(32, 20, 10, 20),
@@ -170,7 +169,7 @@ class _NewEntryRouteState extends State<NewEntryRoute> {
                           if (!currentFocus.hasPrimaryFocus) {
                             currentFocus.unfocus();
                           }
-                          DateTime input = await showDatePicker(
+                          DateTime? input = await showDatePicker(
                               context: context,
                               initialDate: DateTime.now(),
                               firstDate:
@@ -179,14 +178,14 @@ class _NewEntryRouteState extends State<NewEntryRoute> {
                           if (input == null) {
                             return null;
                           }
-                          TimeOfDay selectedTime = await showTimePicker(
+                          TimeOfDay? selectedTime = await showTimePicker(
                               initialTime: TimeOfDay.now(),
                               context: context,
-                              builder: (BuildContext context, Widget child) {
+                              builder: (BuildContext context, Widget? child) {
                                 return MediaQuery(
                                   data: MediaQuery.of(context)
                                       .copyWith(alwaysUse24HourFormat: true),
-                                  child: child,
+                                  child: child!,
                                 );
                               });
                           if (selectedTime != null) {
@@ -195,7 +194,7 @@ class _NewEntryRouteState extends State<NewEntryRoute> {
                                 minutes: selectedTime.minute));
                           }
                           setState(() {
-                            _textController.text = _formatDate(input);
+                            _textController.text = _formatDate(input!);
                             pickedDate = input;
                           });
                         },

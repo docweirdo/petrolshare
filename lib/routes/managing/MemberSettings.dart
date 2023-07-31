@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:petrolshare/models/UserModel.dart';
 import 'package:petrolshare/states/AppState.dart';
 import 'package:petrolshare/states/PoolState.dart';
+import 'package:petrolshare/widgets/ProvideAvatar.dart';
 import 'package:provider/provider.dart';
 
 class MemberSettings extends StatelessWidget {
@@ -32,7 +33,7 @@ class MemberSettings extends StatelessWidget {
             return Row(
               children: <Widget>[
                 Container(
-                  child: _provideAvatar(context, userList[i]),
+                  child: ProvideAvatar(userList[i]),
                   padding: EdgeInsets.symmetric(horizontal: 20, vertical: 20),
                 ),
                 Expanded(
@@ -83,23 +84,6 @@ class MemberSettings extends StatelessWidget {
     );
   }
 
-  Widget _provideAvatar(BuildContext context, UserModel user) {
-    if (user.photoBytes == null) {
-      return CircleAvatar(
-          backgroundColor: Colors.grey[100],
-          //foregroundColor: Theme.of(context).accentColor,
-          radius: 28,
-          child: Text(user.name[0].toUpperCase(),
-              style: TextStyle(
-                fontSize: 30,
-                fontWeight: FontWeight.bold,
-              )));
-    }
-    return CircleAvatar(
-      backgroundImage: MemoryImage(user.photoBytes),
-      radius: 28,
-    );
-  }
 
   void _handleAdmin(UserModel user, PoolState poolState) async {
     try {

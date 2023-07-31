@@ -1,7 +1,6 @@
-import 'dart:typed_data';
 import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
-
+import 'package:flutter/services.dart';
 
 enum UserRole { Admin, Member, FormerMember }
 
@@ -42,7 +41,7 @@ class UserModel {
     }
   }
 
-  String? get roleString {
+  String get roleString {
     switch (role) {
       case UserRole.Member:
         return 'member';
@@ -52,7 +51,7 @@ class UserModel {
         return 'admin';
       default:
         debugPrint('UserModel.roleString fired, no matching role');
-        return null;
+        return '';
     }
   }
 
@@ -66,9 +65,12 @@ class UserModel {
         photoURL = url;
         var uri = Uri.parse(url);
         photoBytes = await http.readBytes(uri, headers: {});
+        return;
       } catch (e) {
         print('Fetch Profile Pic: ' + e.toString());
       }
     }
+    // ByteData bytes = await rootBundle.load('assets/anonymous_user_icon.png');
+    // photoBytes = bytes.buffer.asUint8List();
   }
 }

@@ -1,6 +1,5 @@
 
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 
 class ListEditTile extends StatelessWidget{
 
@@ -10,7 +9,7 @@ class ListEditTile extends StatelessWidget{
   final Icon leadingIcon;
   final List<dynamic> args;
 
-  ListEditTile({@required this.info, @required this.title, @required this.leadingIcon, @required this.editCallback, this.args = const []});
+  ListEditTile({required this.info, required this.title, required this.leadingIcon, required this.editCallback, this.args = const []});
 
   @override
   Widget build(BuildContext context) {

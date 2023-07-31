@@ -134,7 +134,6 @@ class _HomeRouteState extends State<HomeRoute> with RouteAware {
                             user!.name,
                             result['notes']));
                         ScaffoldMessenger.of(context).showSnackBar(
-
                             SnackBar(content: Text('Entry added')));
                       }
           }

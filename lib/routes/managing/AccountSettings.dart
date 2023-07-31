@@ -1,12 +1,14 @@
+import 'dart:typed_data';
+
 import 'package:animations/animations.dart';
 import 'package:flutter/material.dart';
 import 'package:petrolshare/models/UserModel.dart';
 import 'package:petrolshare/routes/authenticate/SignIn.dart';
 import 'package:petrolshare/services/auth.dart';
 import 'package:petrolshare/states/AppState.dart';
-import 'package:petrolshare/states/PoolState.dart';
 import 'package:petrolshare/widgets/CountDownButton.dart';
 import 'package:petrolshare/widgets/ListEditTile.dart';
+import 'package:petrolshare/widgets/ProvideAvatar.dart';
 import 'package:petrolshare/widgets/TextFieldModalSheet.dart';
 import 'package:provider/provider.dart';
 
@@ -22,7 +24,7 @@ class AccountSettings extends StatefulWidget {
 
 class _AccountSettingsState extends State<AccountSettings>
     with SingleTickerProviderStateMixin {
-  AnimationController _controller;
+  late AnimationController _controller;
 
   bool buttonVisible = true;
 
@@ -85,12 +87,12 @@ class _AccountSettingsState extends State<AccountSettings>
                   margin: EdgeInsets.all(30),
                   padding: EdgeInsets.all(30),
                   child: Hero(
-                      child: _provideAvatar(context, user), tag: "profilepic"),
+                      child: ProvideAvatar(user), tag: "profilepic"),
                 ),
                 Positioned(
                   child: AnimatedBuilder(
                     animation: _controller,
-                    builder: (BuildContext context, Widget child) {
+                    builder: (BuildContext context, Widget? child) {
                       return FadeScaleTransition(
                         animation: _controller,
                         child: child,
@@ -103,7 +105,7 @@ class _AccountSettingsState extends State<AccountSettings>
                       child: RawMaterialButton(
                         onPressed: _handlePicchange,
                         elevation: 2.0,
-                        fillColor: Theme.of(context).accentColor,
+                        fillColor: Theme.of(context).colorScheme.secondary,
                         child: Icon(
                           Icons.edit,
                           size: 25.0,
@@ -129,9 +131,9 @@ class _AccountSettingsState extends State<AccountSettings>
             child: ListEditTile(
                 leadingIcon: Icon(Icons.info_outline),
                 editCallback: _handleIdentifierchange,
-                title: user.identifier,
+                title: user.identifier ?? '',
                 info: "Email/Phone"),
-            visible: !user.isAnonymous,
+            visible: user.isAnonymous ?? true,
           ),
           Visibility(
             child: ListTile(
@@ -141,7 +143,7 @@ class _AccountSettingsState extends State<AccountSettings>
               onTap: () => Navigator.of(context)
                   .push(MaterialPageRoute(builder: (context) => SignIn())),
             ),
-            visible: user.isAnonymous,
+            visible: user.isAnonymous ?? true,
           ),
           ListTile(
             contentPadding: EdgeInsets.symmetric(horizontal: 30, vertical: 0),
@@ -154,30 +156,12 @@ class _AccountSettingsState extends State<AccountSettings>
     );
   }
 
-  Widget _provideAvatar(BuildContext context, UserModel _user) {
-    if (_user.photoBytes == null) {
-      return CircleAvatar(
-          backgroundColor: Colors.grey[100],
-          //foregroundColor: Theme.of(context).accentColor,
-          radius: 70,
-          child: Text(_user.name[0].toUpperCase(),
-              style: TextStyle(
-                fontSize: 30,
-                fontWeight: FontWeight.bold,
-              )));
-    }
-    return CircleAvatar(
-      backgroundImage: MemoryImage(_user.photoBytes),
-      radius: 70,
-    );
-  }
-
   void _handleNamechange(BuildContext context, List<dynamic> args) async {
     print("called showModalBottomSheet");
 
     String oldName = args[0];
 
-    String entry = await showModalBottomSheet(
+    String? entry = await showModalBottomSheet(
         context: context,
         isScrollControlled: true,
         builder: (BuildContext context) {
@@ -203,10 +187,9 @@ class _AccountSettingsState extends State<AccountSettings>
 
     widget._auth
         .changeUsername(entry)
-        .then((v) => Scaffold.of(context)
-            .showSnackBar(SnackBar(content: Text('Username changed.'))))
-        .catchError((e) => Scaffold.of(context)
-            .showSnackBar(SnackBar(content: Text('Something went wrong.'))));
+        .then((v) => ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Username changed.'))))
+        .catchError((e) => ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('Something went wrong.'))));
   }
 
   void _handleIdentifierchange(BuildContext context) {
@@ -229,7 +212,7 @@ class _AccountSettingsState extends State<AccountSettings>
           content: Text(
               "Are you sure you want to delete your account? All your data will be lost."),
           actions: <Widget>[
-            FlatButton(
+            TextButton(
               child: Text("Cancel", style: TextStyle(fontSize: 15)),
               onPressed: () {
                 Navigator.of(context).pop(false);
