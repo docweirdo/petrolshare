@@ -9,9 +9,9 @@ class TextFieldModalSheet extends StatefulWidget {
   //final _formFieldKey;
 
   TextFieldModalSheet(
-      {@required this.title,
-      @required this.confirmLabel,
-      @required this.callback,
+      {required this.title,
+      required this.confirmLabel,
+      required this.callback,
       this.maxLength = 0,
       this.initialText = ''});
   //: _formFieldKey = GlobalKey<FormFieldState>();
@@ -27,7 +27,7 @@ class _TextFieldModalSheetState extends State<TextFieldModalSheet> {
   build(BuildContext context) {
     debugPrint("Modalsheet: built");
 
-    String result;
+    String? result;
 
     return SingleChildScrollView(
       child: Container(
@@ -44,13 +44,12 @@ class _TextFieldModalSheetState extends State<TextFieldModalSheet> {
               ),
               Theme(
                 data: Theme.of(context).copyWith(
-                  accentColor: Theme.of(context).primaryColor,
-                  primaryColor: Theme.of(context).accentColor,
-                ),
+                  colorScheme: Theme.of(context).colorScheme.copyWith(secondary: Theme.of(context).colorScheme.primary, 
+                  primary: Theme.of(context).colorScheme.secondary),                ),
                 child: Column(
                   children: <Widget>[
                     TextFormField(
-                      autovalidate: false,
+                      autovalidateMode: AutovalidateMode.disabled,
                       key: _formFieldKey,
                       enableInteractiveSelection: false,
                       enableSuggestions: false,
@@ -64,12 +63,10 @@ class _TextFieldModalSheetState extends State<TextFieldModalSheet> {
                       initialValue: widget.initialText,
                       validator: (value) => widget.callback(value),
                       textInputAction: TextInputAction.done,
-                      onSaved: (value) {
-                        result = value;
-                      },
+                      onSaved: (value) => result = value,
                       onEditingComplete: () {
-                        if (_formFieldKey.currentState.validate()) {
-                          _formFieldKey.currentState.save();
+                        if (_formFieldKey.currentState != null && _formFieldKey.currentState!.validate()) {
+                          _formFieldKey.currentState!.save();
                           Navigator.pop(context, result);
                         }
                       },
@@ -77,17 +74,17 @@ class _TextFieldModalSheetState extends State<TextFieldModalSheet> {
                     ButtonBar(
                       buttonPadding: EdgeInsets.only(right: 0),
                       children: <Widget>[
-                        FlatButton(
+                        TextButton(
                           child: Text("Cancel", style: TextStyle(fontSize: 15)),
                           onPressed: () => Navigator.pop(context),
-                          padding: EdgeInsets.only(right: 10),
+                          style: TextButton.styleFrom(padding: EdgeInsets.only(right: 10)),
                         ),
-                        FlatButton(
+                        TextButton(
                           child: Text(widget.confirmLabel,
                               style: TextStyle(fontSize: 15)),
                           onPressed: () {
-                            if (_formFieldKey.currentState.validate()) {
-                              _formFieldKey.currentState.save();
+                            if (_formFieldKey.currentState != null && _formFieldKey.currentState!.validate()) {
+                              _formFieldKey.currentState!.save();
                               Navigator.pop(context, result);
                             }
                           },

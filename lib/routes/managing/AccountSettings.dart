@@ -1,5 +1,3 @@
-import 'dart:typed_data';
-
 import 'package:animations/animations.dart';
 import 'package:flutter/material.dart';
 import 'package:petrolshare/models/UserModel.dart';
@@ -133,7 +131,7 @@ class _AccountSettingsState extends State<AccountSettings>
                 editCallback: _handleIdentifierchange,
                 title: user.identifier ?? '',
                 info: "Email/Phone"),
-            visible: user.isAnonymous ?? true,
+            visible: user.isAnonymous,
           ),
           Visibility(
             child: ListTile(
@@ -143,7 +141,7 @@ class _AccountSettingsState extends State<AccountSettings>
               onTap: () => Navigator.of(context)
                   .push(MaterialPageRoute(builder: (context) => SignIn())),
             ),
-            visible: user.isAnonymous ?? true,
+            visible: user.isAnonymous,
           ),
           ListTile(
             contentPadding: EdgeInsets.symmetric(horizontal: 30, vertical: 0),

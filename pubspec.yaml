@@ -36,7 +36,7 @@ dependencies:
   animations: ^2.0.7  #Work on new Entry animation later
   fluttertoast: ^8.0.0
   mailto: ^2.0.0
-  url_launcher: ^6.1.12
+  url_launcher: ^6.1.10
   intl: ^0.18.1
 
 

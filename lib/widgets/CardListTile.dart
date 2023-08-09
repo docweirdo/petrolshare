@@ -4,59 +4,42 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:petrolshare/models/UserModel.dart';
 import 'package:petrolshare/states/PoolState.dart';
+import 'package:petrolshare/widgets/ProvideAvatar.dart';
 import 'package:provider/provider.dart';
 
-class CardListTile extends StatefulWidget {
+class CardListTile extends StatelessWidget {
   final LogModel logModel;
 
   CardListTile({required this.logModel});
 
   @override
-  _CardListTileState createState() => _CardListTileState();
-}
-
-class _CardListTileState extends State<CardListTile> {
-  late Color backgroundColor;
-  late SlidableController slidableController;
-
-  @override
-  void initState() {
-    super.initState();
-    backgroundColor = Colors.transparent;
-    slidableController = SlidableController(
-        onSlideAnimationChanged: handleSlideAnimationChanged,
-        onSlideIsOpenChanged: handleSlideIsOpenChanged);
-  }
-
-  @override
   Widget build(BuildContext context) {
-    ValueKey key = ValueKey(widget.logModel.id);
+    ValueKey key = ValueKey(logModel.id);
 
     return Container(
         margin: EdgeInsets.all(4),
-        color: backgroundColor,
+        color: Colors.transparent,
         child: Slidable(
-            actionPane: SlidableBehindActionPane(),
-            showAllActionsThreshold: 0.99,
-            fastThreshold: 1.0,
-            controller: slidableController,
-            actionExtentRatio: 0.25,
-            secondaryActions: <Widget>[
-              IconSlideAction(
-                caption: 'Delete',
-                color: Colors.red,
+            endActionPane: ActionPane(
+              motion: const DrawerMotion(),
+              extentRatio: 0.25,
+              children: <Widget>[
+              SlidableAction(
+                label: 'Delete',
+                backgroundColor: Colors.red,
                 icon: Icons.delete,
-                onTap: () => Scaffold.of(context)
+                onPressed: (context) => ScaffoldMessenger.of(context)
                     .showSnackBar(SnackBar(content: Text('Archive'))),
               ),
-              IconSlideAction(
-                caption: 'Edit',
-                color: Colors.blue,
+              SlidableAction(
+                label: 'Edit',
+                backgroundColor: Colors.blue,
                 icon: Icons.edit,
-                onTap: () => Scaffold.of(context)
-                    .showSnackBar(SnackBar(content: Text('Share'))),
+                onPressed: (context) => ScaffoldMessenger.of(context)
+                    .showSnackBar(SnackBar(content: Text('Edit'))),
               ),
             ],
+            ),
             child: Card(
               key: key,
               elevation: 0,
@@ -94,7 +77,7 @@ class _CardListTileState extends State<CardListTile> {
                                   Container(
                                     padding: EdgeInsets.only(right: 20),
                                     child: _provideAvatar(
-                                        context, widget.logModel),
+                                        context, logModel),
                                   ),
                                   Expanded(
                                     child: Column(
@@ -104,11 +87,11 @@ class _CardListTileState extends State<CardListTile> {
                                         FittedBox(
                                           fit: BoxFit.fitWidth,
                                           child: Text(
-                                              _formatDate(widget.logModel.date),
+                                              _formatDate(logModel.date),
                                               style: TextStyle(fontSize: 27)),
                                         ),
                                         Text(
-                                          widget.logModel.name,
+                                          logModel.name!,
                                           style: TextStyle(fontSize: 14),
                                         ),
                                       ],
@@ -132,7 +115,7 @@ class _CardListTileState extends State<CardListTile> {
                                           Chip(
                                             avatar: Icon(Icons.euro_symbol),
                                             label: Text(_formatNumbers(
-                                                widget.logModel.price)),
+                                                logModel.price)),
                                             labelPadding:
                                                 EdgeInsets.only(right: 5),
                                             padding: EdgeInsets.symmetric(
@@ -142,7 +125,7 @@ class _CardListTileState extends State<CardListTile> {
                                             avatar:
                                                 Icon(Icons.local_gas_station),
                                             label: Text(_formatNumbers(
-                                                widget.logModel.amount)),
+                                                logModel.amount)),
                                             labelPadding:
                                                 EdgeInsets.only(right: 5),
                                             padding: EdgeInsets.symmetric(
@@ -152,7 +135,7 @@ class _CardListTileState extends State<CardListTile> {
                                             avatar:
                                                 Icon(Icons.slow_motion_video),
                                             label: Text(_formatNumbers(
-                                                widget.logModel.roadmeter)),
+                                                logModel.roadmeter)),
                                             labelPadding:
                                                 EdgeInsets.only(right: 5),
                                             padding: EdgeInsets.symmetric(
@@ -164,14 +147,14 @@ class _CardListTileState extends State<CardListTile> {
                                   ]),
                             ),
                             Visibility(
-                              visible: widget.logModel.notes != null &&
-                                  widget.logModel.notes != '',
+                              visible: logModel.notes != null &&
+                                  logModel.notes!.isNotEmpty,
                               child: Divider(),
                             ),
                             Visibility(
-                                visible: widget.logModel.notes != null &&
-                                    widget.logModel.notes != '',
-                                child: Text(widget.logModel.notes ?? ''))
+                                visible: logModel.notes != null &&
+                                    logModel.notes!.isNotEmpty,
+                                child: Text(logModel.notes ?? ''))
                           ],
                         ),
                       ),
@@ -182,7 +165,7 @@ class _CardListTileState extends State<CardListTile> {
                           mainAxisAlignment: MainAxisAlignment.center,
                           mainAxisSize: MainAxisSize.min,
                           children: <Widget>[
-                            Text(_formatNumbers(widget.logModel.price),
+                            Text(_formatNumbers(logModel.price),
                                 style: TextStyle(
                                   fontSize: 30,
                                   fontWeight: FontWeight.bold,
@@ -197,24 +180,10 @@ class _CardListTileState extends State<CardListTile> {
   }
 
   Widget _provideAvatar(BuildContext context, LogModel logModel) {
-    UserModel user =
+    UserModel? user =
         Provider.of<PoolState>(context, listen: false).members[logModel.uid];
 
-    if (user.photoBytes == null) {
-      return CircleAvatar(
-          backgroundColor: Colors.grey[100],
-          //foregroundColor: Theme.of(context).accentColor,
-          radius: 24,
-          child: Text(logModel.name[0].toUpperCase(),
-              style: TextStyle(
-                fontSize: 30,
-                fontWeight: FontWeight.bold,
-              )));
-    }
-    return CircleAvatar(
-      backgroundImage: MemoryImage(user.photoBytes),
-      radius: 24,
-    );
+    return ProvideAvatar(user!);
   }
 
   String _formatDate(DateTime date) {
@@ -227,14 +196,5 @@ class _CardListTileState extends State<CardListTile> {
     return formatter.format(roadmeter);
   }
 
-  void handleSlideAnimationChanged(Animation<double> animation) {
-    debugPrint("CardListTile: Slider animation status: ${animation?.value}");
-    if ((animation?.value ?? 0) < 0.05)
-      setState(() => backgroundColor = Colors.transparent);
-  }
 
-  void handleSlideIsOpenChanged(bool open) {
-    debugPrint("CardListTile: Slider open: $open");
-    if (open) setState(() => backgroundColor = Colors.red);
-  }
 }

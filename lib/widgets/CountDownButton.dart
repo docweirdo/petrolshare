@@ -2,10 +2,10 @@ import 'package:flutter/material.dart';
 import 'dart:async';
 
 class CountDownButton extends StatefulWidget {
-  final Function callback;
+  final VoidCallback callback;
   final String title;
 
-  CountDownButton({Key key, @required this.callback, @required this.title})
+  CountDownButton({Key? key, required this.callback, required this.title})
       : super(key: key);
 
   @override
@@ -13,7 +13,7 @@ class CountDownButton extends StatefulWidget {
 }
 
 class CountDownState extends State<CountDownButton> {
-  Timer _timer;
+  late Timer _timer;
   int _start = 10;
 
 
@@ -27,12 +27,12 @@ class CountDownState extends State<CountDownButton> {
   Widget build(BuildContext context) {
 
     if (_start > 0) {
-      return FlatButton(
+      return TextButton(
         child: Text("$_start", style: TextStyle(fontSize: 15, )),
         onPressed: null,
       );
     } else {
-      return FlatButton(
+      return TextButton(
         child: Text(widget.title, style: TextStyle(fontSize: 15)),
         onPressed: widget.callback,
       );

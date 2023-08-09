@@ -1,5 +1,4 @@
-import 'dart:async';
-import 'dart:js_util';
+
 import 'package:petrolshare/models/LogModel.dart';
 import 'package:petrolshare/models/UserModel.dart';
 import 'package:petrolshare/states/AppState.dart';

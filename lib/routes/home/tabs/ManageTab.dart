@@ -9,7 +9,6 @@ import 'package:petrolshare/states/AppState.dart';
 import 'package:petrolshare/states/PoolState.dart';
 import 'package:petrolshare/widgets/CountDownButton.dart';
 import 'package:petrolshare/widgets/NameAndIcon.dart';
-import 'package:petrolshare/widgets/PoolList.dart';
 import 'package:provider/provider.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -75,7 +74,7 @@ class ManageTab extends StatelessWidget {
                       title: Text('Set Poolname'),
                       onTap: () => _handlePoolRenaming(context, poolState),
                     ),
-                    visible: user.role == UserRole.Admin ?? false,
+                    visible: user.role == UserRole.Admin,
                   ),
                   ListTile(
                     contentPadding:

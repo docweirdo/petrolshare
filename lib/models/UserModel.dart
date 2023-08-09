@@ -70,7 +70,7 @@ class UserModel {
         print('Fetch Profile Pic: ' + e.toString());
       }
     }
-    // ByteData bytes = await rootBundle.load('assets/anonymous_user_icon.png');
-    // photoBytes = bytes.buffer.asUint8List();
+    ByteData bytes = await rootBundle.load('assets/anonymous_user_icon.png');
+    photoBytes = bytes.buffer.asUint8List();
   }
 }

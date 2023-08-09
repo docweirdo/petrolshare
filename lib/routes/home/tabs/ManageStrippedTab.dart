@@ -4,9 +4,7 @@ import 'package:petrolshare/routes/managing/AccountSettings.dart';
 import 'package:flutter/material.dart';
 import 'package:petrolshare/services/auth.dart';
 import 'package:petrolshare/states/AppState.dart';
-import 'package:petrolshare/states/PoolState.dart';
 import 'package:petrolshare/widgets/NameAndIcon.dart';
-import 'package:petrolshare/widgets/PoolList.dart';
 import 'package:provider/provider.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -21,7 +19,6 @@ class ManageStrippedTab extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     AppState appState = Provider.of<AppState>(context);
-    PoolState poolState = Provider.of<PoolState>(context);
     UserModel user = appState.user;
 
     //assert (_user.hashCode == _pool.user.hashCode);

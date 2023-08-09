@@ -8,7 +8,7 @@ class LogModel {
   var price;
   var amount;
   String? name;
-  String notes;
+  String? notes;
 
   LogModel(this.id, this.uid, this.roadmeter, this.price, this.amount,
       this.date, this.name, this.notes);
