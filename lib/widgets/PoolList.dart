@@ -1,6 +1,5 @@
 
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 
 class PoolList extends StatelessWidget{
 
@@ -12,6 +11,7 @@ class PoolList extends StatelessWidget{
   Widget build(BuildContext context){
 
     var keys = _pools.keys.toList();
+    var vals = _pools.values.toList();
 
     return Container(
       width: double.maxFinite,
@@ -34,9 +34,9 @@ class PoolList extends StatelessWidget{
               leading: CircleAvatar(
                 backgroundColor: Colors.grey[100],
                 radius: 20,
-                child: Text(_pools[keys[index]][0].toUpperCase(), style: TextStyle(fontSize: 25, fontWeight: FontWeight.bold,))
+                child: Text(vals[index][0].toUpperCase(), style: TextStyle(fontSize: 25, fontWeight: FontWeight.bold,))
               ),
-              title: Text(_pools[keys[index]]),
+              title: Text(vals[index]),
               onTap: () {
                 Navigator.pop(context, keys[index]);
               },

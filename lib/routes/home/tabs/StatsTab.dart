@@ -1,7 +1,7 @@
 import 'package:flutter/widgets.dart';
 
 class StatsTab extends StatefulWidget {
-  StatsTab({Key key}) : super(key: key);
+  StatsTab({Key? key}) : super(key: key);
 
   @override
   _StatsTabState createState() => _StatsTabState();

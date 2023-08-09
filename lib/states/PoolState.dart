@@ -99,7 +99,7 @@ class PoolState extends ChangeNotifier {
     });
     _logs.removeWhere((key, value) => deleted.contains(key));
 
-    logState = _logs.isEmpty ? LogState.nologs : LogState.retrieved;
+    logState = LogState.retrieved;
 
     notifyListeners();
   }

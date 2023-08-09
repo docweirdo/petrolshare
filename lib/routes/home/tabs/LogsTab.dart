@@ -1,21 +1,19 @@
 import 'dart:collection';
 
-import 'package:flutter/widgets.dart';
 import 'package:flutter/material.dart';
 import 'package:petrolshare/models/LogModel.dart';
 import 'package:petrolshare/states/PoolState.dart';
 import 'package:petrolshare/widgets/CardListTile.dart';
-import 'package:flutter_slidable/flutter_slidable.dart';
 
 import 'package:provider/provider.dart';
 
 class LogsTab extends StatelessWidget {
-  LogsTab({Key key}) : super(key: key);
+  LogsTab({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return Consumer<PoolState>(builder: (context, poolState, _) {
-      if (poolState.logs == null)
+      if (poolState.logState == LogState.retrieved && poolState.logCount == 0)
         return Container();
       else if (poolState.logState == LogState.retrieved)
         return _buildLogList(context, poolState);

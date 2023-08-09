@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 import 'package:petrolshare/routes/home/tabs/ManageStrippedTab.dart';
 import 'package:petrolshare/routes/home/tabs/NoPoolTab.dart';
 import 'package:petrolshare/states/AppState.dart';
-import 'package:petrolshare/widgets/PoolList.dart';
 import 'package:provider/provider.dart';
 import 'package:petrolshare/routes/home/tabs/LogsTab.dart';
 import 'package:petrolshare/routes/home/tabs/StatsTab.dart';
 import 'package:petrolshare/routes/home/tabs/ManageTab.dart';
+
+import '../helpers/poolSelectionDialog.dart';
 
 class PoolWrapper extends StatelessWidget {
   final int _selectedIndex;
@@ -71,20 +71,4 @@ class PoolWrapper extends StatelessWidget {
     }
   }
 
-  Future<String> poolSelection(
-      BuildContext context, Map<String, String> pools) {
-    if (pools.isEmpty) return null;
-
-    if (pools.length == 1) return Future.value(pools.keys.first);
-
-    return showDialog(
-        context: context,
-        barrierDismissible: false,
-        builder: (BuildContext context) {
-          return AlertDialog(
-            title: Text('Choose a pool'),
-            content: PoolList(pools),
-          );
-        });
-  }
 }

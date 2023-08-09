@@ -13,7 +13,7 @@ class DataService {
   /// Takes a [UserModel] and a [Pool] and listens to changes to the UserDoc.
   ///
   /// Returns a Stream of an updated UserModel using [getUserModel(String uid, String poolID)].
-  static Stream<UserModel?> streamUserModel(UserModel user, {String? poolID}) {
+  static Stream<UserModel> streamUserModel(UserModel user, {String? poolID}) {
     DocumentReference userRef = _firestore.collection('users').doc(user.uid);
     return userRef.snapshots().map((userDoc) {
       if (!userDoc.exists) return user;

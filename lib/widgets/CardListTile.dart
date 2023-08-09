@@ -1,4 +1,3 @@
-import 'package:flutter/widgets.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:petrolshare/models/LogModel.dart';
 import 'package:flutter/material.dart';
@@ -10,15 +9,15 @@ import 'package:provider/provider.dart';
 class CardListTile extends StatefulWidget {
   final LogModel logModel;
 
-  CardListTile({@required this.logModel});
+  CardListTile({required this.logModel});
 
   @override
   _CardListTileState createState() => _CardListTileState();
 }
 
 class _CardListTileState extends State<CardListTile> {
-  Color backgroundColor;
-  SlidableController slidableController;
+  late Color backgroundColor;
+  late SlidableController slidableController;
 
   @override
   void initState() {

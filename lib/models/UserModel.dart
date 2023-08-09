@@ -11,16 +11,16 @@ class UserModel {
   String? photoURL;
   UserRole? role;
   String? identifier;
-  bool? isAnonymous;
-  Map<String, String>? membership = {};
+  bool isAnonymous;
+  Map<String, String> membership;
 
   UserModel(this.uid, this.name, this.photoURL,
-      {this.role, this.identifier, this.isAnonymous, this.membership}) {
+      {this.role, this.identifier, this.isAnonymous = false, this.membership = const {}}) {
     photo = photoURL;
   }
 
   UserModel.roleString(this.uid, this.name, this.photoURL,
-      {required String role, this.identifier, this.isAnonymous, this.membership}) {
+      {required String role, this.identifier, this.isAnonymous = false, this.membership = const {}}) {
     roleString = role;
     photo = photoURL;
   }

@@ -7,11 +7,11 @@ enum PoolStatus { notstarted, nopools, retrieved, selected }
 
 class AppState extends ChangeNotifier {
   PoolStatus poolStatus = PoolStatus.notstarted;
-  String selectedPool;
-  String selectedPoolRole; // Ugly but necessary because of overwriting stream
+  String? selectedPool;
+  String? selectedPoolRole; // Ugly but necessary because of overwriting stream / edit: what???
   Map<String, String> availablePools = {};
 
-  UserModel user;
+  late UserModel user;
 
   AppState(User user) {
     update(user);
@@ -21,13 +21,13 @@ class AppState extends ChangeNotifier {
   /// Firebase User has changed.
   void update(User authUser) async {
     //print(authUser);
-    UserModel user =
-        await DataService.getUserModel(authUser.uid, poolID: selectedPool);
 
-    // Incase a new user is created and the cloudfunction hasn't fired yet
+    UserModel? user = await DataService.getUserModel(authUser.uid, poolID: selectedPool);
+
+    // In case a new user is created and the cloudfunction hasn't fired yet
     user ??= UserModel(
         authUser.uid,
-        authUser.isAnonymous ? 'Anonymous' : authUser.displayName,
+        authUser.isAnonymous ? 'Anonymous' : (authUser.displayName ?? 'Anonymous'), // TODO: Not pretty, try to find cleaner solution
         authUser.photoURL,
         identifier: authUser.isAnonymous
             ? null
@@ -50,7 +50,7 @@ class AppState extends ChangeNotifier {
     user = updatedUser;
     availablePools = updatedUser.membership;
 
-    if (user?.uid != updatedUser.uid) {
+    if (user.uid != updatedUser.uid) {
       selectedPoolRole = null;
       selectedPool = null;
       poolStatus =
@@ -73,7 +73,7 @@ class AppState extends ChangeNotifier {
 
   /// Sets the selected Pool to [poolID] if everything checks out.
   Future<String> setPool(String poolID) async {
-    if (poolID == selectedPool) return null;
+    if (poolID == selectedPool) return "";
     if (user.membership[poolID] == null)
       throw "User ${user.uid} not member of Pool $poolID";
 

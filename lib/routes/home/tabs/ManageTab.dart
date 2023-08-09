@@ -1,9 +1,8 @@
 import 'package:animations/animations.dart';
-import 'package:flutter/services.dart';
+import 'package:petrolshare/helpers/poolSelectionDialog.dart';
 import 'package:petrolshare/models/UserModel.dart';
 import 'package:petrolshare/routes/managing/AccountSettings.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 import 'package:petrolshare/routes/managing/MemberSettings.dart';
 import 'package:petrolshare/services/auth.dart';
 import 'package:petrolshare/states/AppState.dart';
@@ -15,9 +14,10 @@ import 'package:provider/provider.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:mailto/mailto.dart';
+import 'package:url_launcher/url_launcher_string.dart';
 
 class ManageTab extends StatelessWidget {
-  ManageTab({Key key}) : super(key: key);
+  ManageTab({Key? key}) : super(key: key);
 
   final AuthSevice _auth = AuthSevice();
 
@@ -47,7 +47,7 @@ class ManageTab extends StatelessWidget {
       ),
       Divider(),
       Container(
-        child: Text(poolState.name, style: TextStyle(color: Colors.grey)),
+        child: Text(poolState.name!, style: TextStyle(color: Colors.grey)),
         padding: EdgeInsets.symmetric(vertical: 10, horizontal: 25),
       ),
       OpenContainer(
@@ -109,7 +109,7 @@ class ManageTab extends StatelessWidget {
                             .then((value) {
                           if (value != null && value != appState.selectedPool) {
                             appState.setPool(value).then((poolName) {
-                              Scaffold.of(context).showSnackBar(SnackBar(
+                              ScaffoldMessenger.of(context).showSnackBar(SnackBar(
                                   content: Text('Switched to $poolName'),
                                   duration: Duration(seconds: 2)));
                             });
@@ -138,7 +138,7 @@ class ManageTab extends StatelessWidget {
                       children: <Widget>[
                         Expanded(
                           child: InkWell(
-                            onTap: () => _launchURL("http://www.docweirdo.de"),
+                            onTap: () => _launchURL(Uri.parse("http://www.docweirdo.de")),
                             child: Align(
                               alignment: Alignment.center,
                               child: Padding(
@@ -151,7 +151,7 @@ class ManageTab extends StatelessWidget {
                         ),
                         Expanded(
                           child: InkWell(
-                            onTap: () => _launchURL("http://www.docweirdo.de"),
+                            onTap: () => _launchURL(Uri.parse("http://www.docweirdo.de")),
                             child: Align(
                               alignment: Alignment.center,
                               child: Padding(
@@ -182,13 +182,13 @@ class ManageTab extends StatelessWidget {
                   "Are you sure you want to log out? Create a permanent account, otherwise your data will be lost")
               : Text("Are you sure you want to log out?"),
           actions: <Widget>[
-            FlatButton(
+            TextButton(
               child: Text("Cancel", style: TextStyle(fontSize: 15)),
               onPressed: () {
                 Navigator.of(context).pop();
               },
             ),
-            FlatButton(
+            TextButton(
               child: Text("Log out", style: TextStyle(fontSize: 15)),
               onPressed: () {
                 _auth.signOut();
@@ -204,7 +204,7 @@ class ManageTab extends StatelessWidget {
   Future<void> _handlePoolRenaming(
       BuildContext context, PoolState poolState) async {
     final _formKey = GlobalKey<FormState>();
-    String poolname;
+    String? poolname = poolState.name;
 
     await showDialog(
         context: context,
@@ -212,8 +212,7 @@ class ManageTab extends StatelessWidget {
         builder: (BuildContext context) {
           return Theme(
               data: Theme.of(context).copyWith(
-                primaryColor: Theme.of(context).accentColor,
-                accentColor: Theme.of(context).primaryColor,
+                colorScheme: Theme.of(context).colorScheme.copyWith(secondary: Theme.of(context).colorScheme.primary, primary: Theme.of(context).colorScheme.secondary),
               ),
               child: AlertDialog(
                 titlePadding: EdgeInsets.all(20),
@@ -237,24 +236,26 @@ class ManageTab extends StatelessWidget {
                       counterText: "",
                     ),
                     initialValue: poolState.name,
-                    onSaved: (newValue) => poolname = newValue,
+                    onSaved: (newValue) => {
+                        if (newValue != null) poolname = newValue
+                      },
                     validator: (value) {
-                      if (value.isEmpty) return 'Required';
+                      if (value == null || value.isEmpty) return 'Required';
                       return null;
                     },
                     textInputAction: TextInputAction.done,
                   ),
                 ),
                 actions: <Widget>[
-                  FlatButton(
+                  TextButton(
                     child: Text("Cancel"),
                     onPressed: () => Navigator.pop(context),
                   ),
-                  FlatButton(
+                  TextButton(
                     child: Text("Rename"),
                     onPressed: () {
-                      if (_formKey.currentState.validate()) {
-                        _formKey.currentState.save();
+                      if (_formKey.currentState != null && _formKey.currentState!.validate()) {
+                        _formKey.currentState!.save();
                       }
                       Navigator.pop(context);
                     },
@@ -265,22 +266,22 @@ class ManageTab extends StatelessWidget {
 
     if (poolname == null) return;
 
-    poolname = poolname.trim();
+    poolname = poolname!.trim();
 
     if (poolname == poolState.name) return;
 
     poolState
-        .renamePool(poolname)
-        .then((value) => Scaffold.of(context)
+        .renamePool(poolname!)
+        .then((value) => ScaffoldMessenger.of(context)
             .showSnackBar(SnackBar(content: Text('Renamed pool to $poolname'))))
-        .catchError((error) => Scaffold.of(context)
+        .catchError((error) => ScaffoldMessenger.of(context)
             .showSnackBar(SnackBar(content: Text(error.toString()))));
   }
 
   Future<void> _handlePoolCreation(
       BuildContext context, AppState appState) async {
     final _formKey = GlobalKey<FormState>();
-    String poolname;
+    String? poolname;
 
     if (appState.user.isAnonymous) {
       Fluttertoast.showToast(
@@ -312,8 +313,7 @@ class ManageTab extends StatelessWidget {
         builder: (BuildContext context) {
           return Theme(
               data: Theme.of(context).copyWith(
-                primaryColor: Theme.of(context).accentColor,
-                accentColor: Theme.of(context).primaryColor,
+                colorScheme: Theme.of(context).colorScheme.copyWith(secondary: Theme.of(context).colorScheme.primary, primary: Theme.of(context).colorScheme.secondary),
               ),
               child: AlertDialog(
                 titlePadding: EdgeInsets.all(20),
@@ -334,24 +334,26 @@ class ManageTab extends StatelessWidget {
                       filled: true,
                       labelText: 'Poolname',
                     ),
-                    onSaved: (newValue) => poolname = newValue,
+                    onSaved: (newValue) => {
+                        if (newValue != null) poolname = newValue
+                    },
                     validator: (value) {
-                      if (value.isEmpty) return 'Required';
+                      if (value == null || value.isEmpty) return 'Required';
                       return null;
                     },
                     textInputAction: TextInputAction.done,
                   ),
                 ),
                 actions: <Widget>[
-                  FlatButton(
+                  TextButton(
                     child: Text("Cancel"),
                     onPressed: () => Navigator.pop(context),
                   ),
-                  FlatButton(
+                  TextButton(
                     child: Text("Create"),
                     onPressed: () {
-                      if (_formKey.currentState.validate()) {
-                        _formKey.currentState.save();
+                      if (_formKey.currentState != null && _formKey.currentState!.validate()) {
+                        _formKey.currentState!.save();
                       }
                       Navigator.pop(context);
                     },
@@ -362,13 +364,13 @@ class ManageTab extends StatelessWidget {
 
     if (poolname == null) return;
 
-    poolname = poolname.trim();
+    poolname = poolname!.trim();
 
-    if (poolname.length == 0) return;
+    if (poolname!.length == 0) return;
 
     //String poolID;
 
-    appState.createPool(poolname);
+    appState.createPool(poolname!);
     /*
         .then((value) {
           poolID = value;
@@ -416,7 +418,7 @@ class ManageTab extends StatelessWidget {
           content: Text(
               "Are you sure you want to delete pool \"${poolState.name}\"? All data will be lost."),
           actions: <Widget>[
-            FlatButton(
+            TextButton(
               child: Text("Cancel", style: TextStyle(fontSize: 15)),
               onPressed: () {
                 Navigator.of(context).pop(false);
@@ -437,7 +439,7 @@ class ManageTab extends StatelessWidget {
 
     if (result == true) {
       try {
-        await appState.deletePool(poolState.id);
+        await appState.deletePool(poolState.id!);
 
         // TODO: Still needed? Poolwrapper should trigger selection widget
         // because of AppState change
@@ -466,28 +468,12 @@ class ManageTab extends StatelessWidget {
 
       } catch (e) {
         print(e);
-        Scaffold.of(context)
+        ScaffoldMessenger.of(context)
             .showSnackBar(SnackBar(content: Text('Something went wrong.')));
       }
     }
   }
 
-  Future<String> poolSelection(
-      BuildContext context, Map<String, String> pools) {
-    if (pools.isEmpty) return null;
-
-    if (pools.length == 1) return Future.value(pools.keys.toList()[0]);
-
-    return showDialog(
-        context: context,
-        barrierDismissible: false,
-        builder: (BuildContext context) {
-          return AlertDialog(
-            title: Text('Choose a pool'),
-            content: PoolList(pools),
-          );
-        });
-  }
 
   void _handleLeavePool(
       BuildContext context, String uid, PoolState poolState) async {
@@ -502,7 +488,7 @@ class ManageTab extends StatelessWidget {
           content: Text(
               "Are you sure you want to leave pool \"${poolState.name}\"?"),
           actions: <Widget>[
-            FlatButton(
+            TextButton(
               child: Text("Cancel", style: TextStyle(fontSize: 15)),
               onPressed: () {
                 Navigator.of(context).pop(false);
@@ -553,15 +539,15 @@ class ManageTab extends StatelessWidget {
         } */
       } catch (e) {
         print(e);
-        Scaffold.of(context)
+        ScaffoldMessenger.of(context)
             .showSnackBar(SnackBar(content: Text('Something went wrong.')));
       }
     }
   }
 
-  void _launchURL(String url) async {
-    if (await canLaunch(url)) {
-      await launch(url);
+  void _launchURL(Uri url) async {
+    if (await canLaunchUrl(url)) {
+      await launchUrl(url);
     } else {
       throw 'Could not launch $url';
     }
@@ -573,6 +559,6 @@ class ManageTab extends StatelessWidget {
       subject: 'Feedback: Petrolshare',
     );
 
-    await launch('$mailtoLink');
+    await launchUrlString('$mailtoLink');
   }
 }
